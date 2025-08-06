@@ -1,0 +1,46 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+build/
+.out/
+
+# Log files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Env files
+.env
+.env.*.local
+
+# System files
+.DS_Store
+Thumbs.db
+
+# OS or editor settings
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Mac 快捷鍵資料庫
+._*
+
+# Local history or cache
+.cache/
+tmp/
+temp/
+
+# Optional: VS Code settings cache
+.history/
