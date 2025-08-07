@@ -3,7 +3,7 @@ import './App.css'
 
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
-import Searchbar from './components/Searchbar'
+import Filterbar from './components/Filterbar'
 
 function App() {
   return (
@@ -15,8 +15,8 @@ function App() {
       {/* Hero 區塊 */}
       <Hero/>
 
-      {/* 搜尋列 Searchbar */}
-      <Searchbar/>
+      {/* 篩選列 Filterbar */}
+      <Filterbar/>
 
       {/* 內容區塊（車輛卡片之後會放這） */}
       <div className="container py-5">
