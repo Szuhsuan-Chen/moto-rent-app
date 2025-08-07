@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 
 import Navbar from './components/Navbar'
@@ -22,15 +20,14 @@ function App() {
 
       {/* 內容區塊（車輛卡片之後會放這） */}
       <div className="container py-5">
-        {/* <h2 className="mb-4">🔥 熱門車款</h2> */}
-        <h2 className="mb-4">🔥 XXXX</h2>
+        <h2 className="mb-4">🔥 熱門車款</h2>
         <div className="row">
           {/* 每張車輛卡片 */}
           <div className="col-md-4 mb-4">
             <div className="card">
-              <img src="https://via.placeholder.com/400x250" className="card-img-top" alt="bike" />
+              <img src="../public/KAWASAKI_NINJA_400.png" className="card-img-top" alt="bike" />
               <div className="card-body">
-                <h5 className="card-title">Honda 140</h5>
+                <h5 className="card-title">KAWASAKI NINJA 400</h5>
                 <p className="card-text">引擎 140cc / 時速 80km/h</p>
                 <p className="card-text fw-bold">$56 / 每小時</p>
                 <a href="#" className="btn btn-primary">Rent Now</a>
@@ -40,6 +37,9 @@ function App() {
           {/* 更多車卡可以用 map 動態產生 */}
         </div>
       </div>
+
+      {/* footer */}
+      <Footer/>
     </>
   )
 }
