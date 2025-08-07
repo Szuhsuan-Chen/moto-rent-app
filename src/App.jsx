@@ -3,7 +3,7 @@ import './App.css'
 
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
-import Filterbar from './components/Filterbar'
+import Footer from './components/Footer'
 
 function App() {
   return (
@@ -15,9 +15,6 @@ function App() {
       {/* Hero 區塊 */}
       <Hero/>
 
-      {/* 篩選列 Filterbar */}
-      <Filterbar/>
-
       {/* 內容區塊（車輛卡片之後會放這） */}
       <div className="container py-5">
         <h2 className="mb-4">🔥 熱門車款</h2>
@@ -25,7 +22,7 @@ function App() {
           {/* 每張車輛卡片 */}
           <div className="col-md-4 mb-4">
             <div className="card">
-              <img src="../public/KAWASAKI_NINJA_400.png" className="card-img-top" alt="bike" />
+              <img src="/KAWASAKI_NINJA_400.png" className="card-img-top" alt="bike" />
               <div className="card-body">
                 <h5 className="card-title">KAWASAKI NINJA 400</h5>
                 <p className="card-text">引擎 140cc / 時速 80km/h</p>

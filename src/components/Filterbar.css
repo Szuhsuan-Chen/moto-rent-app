@@ -6,7 +6,15 @@
   padding: 12px;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  align-items: center;
+  justify-content: center;
+  
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  max-width: 90%;
+  width: fit-content;
 }
 
 .filter-bar select,
@@ -20,7 +28,8 @@
 }
 
 .filter-bar input[type="date"] {
-  min-width: 150px;
+  width: auto;
+  max-width: 130px;
 }
 
 .filter-btn {

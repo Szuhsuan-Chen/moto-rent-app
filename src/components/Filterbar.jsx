@@ -1,5 +1,7 @@
 import React from "react";
 import './Filterbar.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 function Filterbar() {
   return (
@@ -13,7 +15,7 @@ function Filterbar() {
       </select>
 
       {/* 選擇日期 */}
-      <input type="date" name="date" />
+      <input type="date" name="date" min="2025-09-01" max="2025-11-30" />
 
       {/* 開始時間 */}
       <select name="startTime" defaultValue="">
@@ -50,7 +52,9 @@ function Filterbar() {
       </select>
 
       {/* 篩選按鈕 */}
-      <button className="filter-btn" type="button">Search 🔍</button>
+      <button className="filter-btn" type="button">
+        Search <FontAwesomeIcon icon={faMagnifyingGlass} />
+      </button>
     </div>
   );
 };
