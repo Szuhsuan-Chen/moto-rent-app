@@ -4,3 +4,9 @@
     text-align: center;
     height: 300px;
 }
+
+.social-icons {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

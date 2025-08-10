@@ -1,13 +1,13 @@
 import React from 'react'
 import './Navbar.css';
-import logoImage from '../assets/MotoRentR.jpeg';
+import logoImageBlack from '/MotoRentR_logo_black.png';
 
 function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light px-4 container-fluid">
       {/* 品牌 Logo */}
       <a className="navbar-brand" href="#">
-        <img className='logo-image' src={logoImage}></img>
+        <img className='logo-image' src={logoImageBlack}></img>
       </a>
 
       {/* 漢堡選單按鈕 */}
