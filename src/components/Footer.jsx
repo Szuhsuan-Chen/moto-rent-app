@@ -3,7 +3,7 @@ import './Footer.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons'
 import { faFacebookF, faXTwitter, faInstagram, faThreads } from '@fortawesome/free-brands-svg-icons'
-import logoImageWhite from '/MotoRentR_logo_white.png';
+import logoImageWhite from '../assets/MotoRentR_logo_white.png';
 
 function Footer(){
     return (

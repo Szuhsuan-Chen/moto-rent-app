@@ -1,6 +1,6 @@
 import React from 'react'
 import './Navbar.css';
-import logoImageBlack from '/MotoRentR_logo_black.png';
+import logoImageBlack from '../assets/MotoRentR_logo_black.png';
 
 function Navbar() {
   return (

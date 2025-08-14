@@ -41,7 +41,7 @@ function Filterbar() {
       </select>
 
       {/* 車型類別（價格） */}
-      <select name="motoType" defaultValue="">
+      <select name="priceCategory" defaultValue="">
         <option value="" disabled hidden>車型類別（價格）</option>
         <option value="type-ss">TYPE-SS</option>
         <option value="type-s">TYPE-S</option>
