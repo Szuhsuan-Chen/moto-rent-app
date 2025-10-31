@@ -1,12 +1,172 @@
-# React + Vite
+# 摩托車租賃應用程式
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+這是一個使用 React + Flask + MySQL + Docker 構建的摩托車租賃應用程式。
 
-Currently, two official plugins are available:
+## 技術棧
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **前端**: React 18 + Vite + Bootstrap 5
+- **後端**: Python Flask + SQLAlchemy
+- **資料庫**: MySQL 8.0
+- **容器化**: Docker + Docker Compose
 
-## Expanding the ESLint configuration
+## 項目結構
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+moto-rent-app/
+├── docker-compose.yml          # Docker Compose 配置
+├── frontend/                   # React 前端應用
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── src/
+│   │   ├── App.jsx
+│   │   └── components/
+└── backend/                    # Flask 後端 API
+│   ├── Dockerfile
+│   ├── app.py
+│   └── requirements.txt
+└── db/                        # 資料庫初始化腳本
+    └── init.sql
+```
+
+## 快速開始
+
+### 前置條件
+
+- 安裝 [Docker](https://www.docker.com/get-started)
+- 安裝 [Docker Compose](https://docs.docker.com/compose/install/)
+
+### 運行應用程式
+
+1. **克隆存儲庫並進入目錄**:
+   ```bash
+   cd moto-rent-app
+   ```
+
+2. **使用 Docker Compose 啟動所有服務**:
+   ```bash
+   docker-compose up --build
+   ```
+
+3. **等待所有服務啟動完成**，然後開啟瀏覽器訪問:
+   - 前端應用: http://localhost:3000
+   - 後端 API: http://localhost:5000
+   - MySQL 資料庫: localhost:3306
+
+### 停止應用程式
+
+```bash
+docker-compose down
+```
+
+如果想要清除所有數據（包括資料庫）:
+```bash
+docker-compose down -v
+```
+
+## API 端點
+
+### 摩托車相關 API
+
+- `GET /api/motorcycles` - 獲取所有摩托車
+- `GET /api/motorcycles/<id>` - 獲取特定摩托車
+- `GET /api/motorcycles/brand/<brand>` - 根據品牌篩選
+- `GET /api/motorcycles/type/<type>` - 根據類型篩選
+
+### 範例 API 調用
+
+```bash
+# 獲取所有摩托車
+curl http://localhost:5000/api/motorcycles
+
+# 獲取特定品牌的摩托車
+curl http://localhost:5000/api/motorcycles/brand/KAWASAKI
+
+# 獲取特定類型的摩托車
+curl http://localhost:5000/api/motorcycles/type/跑車
+```
+
+## 資料庫配置
+
+- **資料庫名稱**: mydb
+- **用戶名**: root
+- **密碼**: example
+- **端口**: 3306
+
+MySQL 資料庫會在第一次啟動時自動執行 `db/init.sql` 腳本來創建表格和插入範例資料。
+
+## 開發模式
+
+如果你想要在開發模式下運行應用程式：
+
+### 前端開發
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 後端開發
+
+```bash
+cd backend
+pip install -r requirements.txt
+python app.py
+```
+
+### 資料庫連接
+
+開發模式下確保 MySQL 正在運行，並更新後端的環境變數:
+
+```bash
+export DB_HOST=localhost
+export DB_USER=root
+export DB_PASSWORD=example
+export DB_NAME=mydb
+```
+
+## 功能特色
+
+- ✅ 響應式網頁設計
+- ✅ 摩托車資料展示
+- ✅ 品牌和類型篩選
+- ✅ RESTful API
+- ✅ Docker 容器化部署
+- ✅ MySQL 資料持久化
+- ✅ 錯誤處理和備援機制
+
+## 故障排除
+
+### 常見問題
+
+1. **容器啟動失敗**
+   - 確保 Docker 正在運行
+   - 檢查端口 3000, 5000, 3306 是否被占用
+
+2. **資料庫連接失敗**
+   - 等待 MySQL 容器完全啟動（通常需要 30-60 秒）
+   - 檢查 `docker-compose logs db` 查看資料庫日誌
+
+3. **前端無法獲取資料**
+   - 確保後端服務正在運行
+   - 檢查瀏覽器開發者工具的網路標籤
+
+### 查看日誌
+
+```bash
+# 查看所有服務的日誌
+docker-compose logs
+
+# 查看特定服務的日誌
+docker-compose logs frontend
+docker-compose logs backend
+docker-compose logs db
+```
+
+## 貢獻
+
+歡迎提交 Pull Request 或開啟 Issue 來改進這個項目！
+
+## 授權
+
+MIT License
