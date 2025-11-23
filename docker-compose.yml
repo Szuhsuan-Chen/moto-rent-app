@@ -17,10 +17,10 @@ services:
     depends_on:
       - db
     environment:
-      - DB_HOST=db
-      - DB_USER=root
-      - DB_PASSWORD=example
-      - DB_NAME=mydb
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: example
+      DB_NAME: mydb
     restart: unless-stopped
 
   db:
