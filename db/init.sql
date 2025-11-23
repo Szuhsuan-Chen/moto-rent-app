@@ -43,6 +43,6 @@ ON DUPLICATE KEY UPDATE
     price = VALUES(price);
 
 -- 建立索引以提升查詢效能
-CREATE INDEX idx_brand ON motorcycles(brand);
-CREATE INDEX idx_moto_type ON motorcycles(moto_type);
-CREATE INDEX idx_price ON motorcycles(price);
+ALTER TABLE motorcycles ADD INDEX idx_brand(brand);
+ALTER TABLE motorcycles ADD INDEX idx_moto_type(moto_type);
+ALTER TABLE motorcycles ADD INDEX idx_price(price);
