@@ -1,5 +1,5 @@
-# 使用 Node.js 18 官方基礎鏡像
-FROM node:18-alpine
+# 使用 Node.js 20 官方基礎鏡像
+FROM node:20-alpine
 
 # 設定工作目錄
 WORKDIR /app
@@ -17,4 +17,5 @@ COPY . .
 EXPOSE 3000
 
 # 啟動開發服務器
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+ENTRYPOINT ["npm"]
+CMD ["run", "dev", "--", "--host", "0.0.0.0"]

@@ -21,4 +21,5 @@ ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 
 # 啟動應用程式
-CMD ["python", "app.py"]
+ENTRYPOINT ["python"]
+CMD ["app.py"]
