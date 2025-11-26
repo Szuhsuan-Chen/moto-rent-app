@@ -91,7 +91,7 @@ function App() {
 
       {/* 內容區塊（車輛卡片之後會放這） */}
       <div className="container py-5">
-        <h2 className="mb-4">🔥 熱門車款</h2>
+        {/* <h2 className="mb-4">🔥 熱門車款</h2> */}
         
         {/* 顯示錯誤訊息（如果有的話） */}
         {error && (
