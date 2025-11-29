@@ -18,14 +18,47 @@ DB_CONFIG = {
     'collation': 'utf8mb4_unicode_ci'
 }
 
-# 車型類別價格映射
-PRICE_CATEGORY_MAP = {
-    'type-ss': {'min': 6000, 'max': 10000},
-    'type-s': {'min': 4000, 'max': 5999},
-    'type-a': {'min': 3000, 'max': 3999},
-    'type-b': {'min': 2000, 'max': 2999},
-    'type-c': {'min': 1000, 'max': 1999},
-    'type-minibike': {'min': 0, 'max': 999}
+
+
+# 車型類別與租借時長的價格對應表
+# 格式: RENTAL_PRICE_MAP[車型類別][租借時長] = 價格
+RENTAL_PRICE_MAP = {
+    'type-ss': {
+        '5h': 3000,   # TYPE-SS 5小時
+        '10h': 4800,  # TYPE-SS 10小時
+        '24h': 6000,  # TYPE-SS 24小時
+        '48h': 10800  # TYPE-SS 48小時
+    },
+    'type-s': {
+        '5h': 2500,   # TYPE-S 5小時
+        '10h': 4000,  # TYPE-S 10小時
+        '24h': 5000,  # TYPE-S 24小時
+        '48h': 9000   # TYPE-S 48小時
+    },
+    'type-a': {
+        '5h': 2000,   # TYPE-A 5小時
+        '10h': 3200,  # TYPE-A 10小時
+        '24h': 4000,  # TYPE-A 24小時
+        '48h': 7200   # TYPE-A 48小時
+    },
+    'type-b': {
+        '5h': 1500,   # TYPE-B 5小時
+        '10h': 2400,  # TYPE-B 10小時
+        '24h': 3000,  # TYPE-B 24小時
+        '48h': 5400   # TYPE-B 48小時
+    },
+    'type-c': {
+        '5h': 1000,   # TYPE-C 5小時
+        '10h': 1600,  # TYPE-C 10小時
+        '24h': 2000,  # TYPE-C 24小時
+        '48h': 3600   # TYPE-C 48小時
+    },
+    'type-minibike': {
+        '5h': 500,    # TYPE-MiniBike 5小時
+        '10h': 800,   # TYPE-MiniBike 10小時
+        '24h': 1000,  # TYPE-MiniBike 24小時
+        '48h': 1800   # TYPE-MiniBike 48小時
+    }
 }
 
 def get_db_connection():
@@ -95,11 +128,10 @@ def get_motorcycles():
         query = "SELECT * FROM motorcycles WHERE 1=1"
         params = []
         
-        # 根據車型類別（價格範圍）篩選
-        if price_category and price_category in PRICE_CATEGORY_MAP:
-            price_range = PRICE_CATEGORY_MAP[price_category]
-            query += " AND CAST(price AS UNSIGNED) BETWEEN %s AND %s"
-            params.extend([price_range['min'], price_range['max']])
+        # 根據車型類別篩選
+        if price_category and price_category in RENTAL_PRICE_MAP:
+            query += " AND price_category = %s"
+            params.append(price_category)
         
         # 根據車型類型篩選
         if moto_type:
@@ -111,8 +143,8 @@ def get_motorcycles():
             query += " AND brand = %s"
             params.append(brand)
         
-        # 排序
-        query += " ORDER BY price ASC"
+        # 排序（依車型類別的 24h 價格排序）
+        query += " ORDER BY price_category DESC"
         
         # 執行查詢
         cursor.execute(query, params)
@@ -121,7 +153,7 @@ def get_motorcycles():
         # 處理查詢結果
         result = []
         for moto in motorcycles:
-            # 檢查日期和時間可用性（這裡簡化處理，實際應該有租借記錄表）
+            # 檢查日期和時間可用性
             availability_status = check_availability(
                 moto['id'], 
                 branch, 
@@ -130,12 +162,25 @@ def get_motorcycles():
                 duration
             )
             
+            # 根據車型類別和租借時長查表獲得價格
+            price_cat = moto['price_category']
+            rental_price = None
+            
+            if price_cat in RENTAL_PRICE_MAP:
+                if duration and duration in RENTAL_PRICE_MAP[price_cat]:
+                    # 如果有指定 duration，返回該時長的價格
+                    rental_price = RENTAL_PRICE_MAP[price_cat][duration]
+                else:
+                    # 如果沒有指定 duration，返回 24h 價格作為預設顯示
+                    rental_price = RENTAL_PRICE_MAP[price_cat]['24h']
+            
             moto_data = {
                 'id': moto['id'],
                 'image': moto['image'],
                 'title': moto['title'],
                 'brand': moto['brand'],
-                'price': moto['price'],
+                'price_category': price_cat,
+                'price': rental_price,  # 動態查表得到的價格
                 'moto_type': moto['moto_type'],
                 'engine_displacement': moto['engine_displacement'],
                 'max_horsepower': moto['max_horsepower'],
@@ -251,6 +296,15 @@ def get_motorcycle_detail(motorcycle_id):
         if not motorcycle:
             return jsonify({'error': '找不到指定的摩托車'}), 404
         
+        # 根據車型類別查表獲得所有時長的價格
+        price_cat = motorcycle['price_category']
+        price_info = {}
+        
+        if price_cat in RENTAL_PRICE_MAP:
+            price_info = RENTAL_PRICE_MAP[price_cat]
+        
+        motorcycle['prices'] = price_info  # 返回所有時長的價格
+        
         return jsonify({
             'success': True,
             'data': motorcycle
@@ -351,12 +405,12 @@ def get_branches():
 def get_price_categories():
     """獲取價格類別資訊"""
     categories = [
-        {'id': 'type-ss', 'name': 'TYPE-SS', 'price_range': '6000+'},
-        {'id': 'type-s', 'name': 'TYPE-S', 'price_range': '4000-5999'},
-        {'id': 'type-a', 'name': 'TYPE-A', 'price_range': '3000-3999'},
-        {'id': 'type-b', 'name': 'TYPE-B', 'price_range': '2000-2999'},
-        {'id': 'type-c', 'name': 'TYPE-C', 'price_range': '1000-1999'},
-        {'id': 'type-minibike', 'name': 'TYPE-MiniBike', 'price_range': '0-999'}
+        {'id': 'type-ss', 'name': 'TYPE-SS', 'price': 6000},
+        {'id': 'type-s', 'name': 'TYPE-S', 'price': 5000},
+        {'id': 'type-a', 'name': 'TYPE-A', 'price': 4000},
+        {'id': 'type-b', 'name': 'TYPE-B', 'price': 3000},
+        {'id': 'type-c', 'name': 'TYPE-C', 'price': 2000},
+        {'id': 'type-minibike', 'name': 'TYPE-MiniBike', 'price': 1000}
     ]
     
     return jsonify({
