@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+﻿from flask import Flask, jsonify, request
 from flask_cors import CORS
 import mysql.connector
 from mysql.connector import Error
@@ -120,7 +120,7 @@ def get_motorcycles():
         # 建立資料庫連接
         connection = get_db_connection()
         if not connection:
-            return jsonify({'error': '資料庫連接失敗'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = connection.cursor(dictionary=True)
         
@@ -215,9 +215,9 @@ def get_motorcycles():
         }), 200
         
     except Error as e:
-        return jsonify({'error': f'資料庫查詢錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Database query error: {str(e)}'}), 500
     except Exception as e:
-        return jsonify({'error': f'伺服器錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
     finally:
         close_db_connection(connection, cursor)
 
@@ -236,12 +236,12 @@ def check_availability(motorcycle_id, branch, date, start_time, duration):
             if rental_date.date() < current_date:
                 return {
                     'available': False,
-                    'message': '選擇的日期已過期'
+                    'message': 'Selected date has expired'
                 }
         except ValueError:
             return {
                 'available': False,
-                'message': '日期格式不正確'
+                'message': 'Incorrect date format'
             }
     
     # 檢查分店是否有效
@@ -249,7 +249,7 @@ def check_availability(motorcycle_id, branch, date, start_time, duration):
     if branch and branch not in valid_branches:
         return {
             'available': False,
-            'message': '無效的分店選擇'
+            'message': 'Invalid branch selection'
         }
     
     # 檢查開始時間格式
@@ -259,7 +259,7 @@ def check_availability(motorcycle_id, branch, date, start_time, duration):
         except ValueError:
             return {
                 'available': False,
-                'message': '時間格式不正確'
+                'message': 'Incorrect time format'
             }
     
     # 檢查租借時長
@@ -267,7 +267,7 @@ def check_availability(motorcycle_id, branch, date, start_time, duration):
     if duration and duration not in valid_durations:
         return {
             'available': False,
-            'message': '無效的租借時長'
+            'message': 'Invalid rental duration'
         }
     
     # 如果所有參數都有值，檢查租借記錄表
@@ -305,7 +305,7 @@ def check_availability(motorcycle_id, branch, date, start_time, duration):
                 if conflict:
                     return {
                         'available': False,
-                        'message': '此時段已被預訂'
+                        'message': 'This time slot is already booked'
                     }
         except Exception as e:
             print(f"檢查可用性錯誤: {e}")
@@ -313,7 +313,7 @@ def check_availability(motorcycle_id, branch, date, start_time, duration):
     # 如果所有檢查都通過，返回可用
     return {
         'available': True,
-        'message': '可以租借'
+        'message': 'Available for rent'
     }
 
 @app.route('/api/motorcycles/<int:motorcycle_id>', methods=['GET'])
@@ -325,7 +325,7 @@ def get_motorcycle_detail(motorcycle_id):
     try:
         connection = get_db_connection()
         if not connection:
-            return jsonify({'error': '資料庫連接失敗'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = connection.cursor(dictionary=True)
         query = "SELECT * FROM motorcycles WHERE id = %s"
@@ -333,7 +333,7 @@ def get_motorcycle_detail(motorcycle_id):
         motorcycle = cursor.fetchone()
         
         if not motorcycle:
-            return jsonify({'error': '找不到指定的摩托車'}), 404
+            return jsonify({'error': 'Motorcycle not found'}), 404
         
         # 根據車型類別查表獲得所有時長的價格
         price_cat = motorcycle['price_category']
@@ -350,9 +350,9 @@ def get_motorcycle_detail(motorcycle_id):
         }), 200
         
     except Error as e:
-        return jsonify({'error': f'資料庫查詢錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Database query error: {str(e)}'}), 500
     except Exception as e:
-        return jsonify({'error': f'伺服器錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
     finally:
         close_db_connection(connection, cursor)
 
@@ -365,7 +365,7 @@ def get_brands():
     try:
         connection = get_db_connection()
         if not connection:
-            return jsonify({'error': '資料庫連接失敗'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = connection.cursor()
         query = "SELECT DISTINCT brand FROM motorcycles ORDER BY brand"
@@ -378,7 +378,7 @@ def get_brands():
         }), 200
         
     except Error as e:
-        return jsonify({'error': f'資料庫查詢錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Database query error: {str(e)}'}), 500
     finally:
         close_db_connection(connection, cursor)
 
@@ -391,7 +391,7 @@ def get_types():
     try:
         connection = get_db_connection()
         if not connection:
-            return jsonify({'error': '資料庫連接失敗'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = connection.cursor()
         query = "SELECT DISTINCT moto_type FROM motorcycles ORDER BY moto_type"
@@ -404,7 +404,7 @@ def get_types():
         }), 200
         
     except Error as e:
-        return jsonify({'error': f'資料庫查詢錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Database query error: {str(e)}'}), 500
     finally:
         close_db_connection(connection, cursor)
 
@@ -488,7 +488,7 @@ def create_rental():
         # 計算總價和結束時間
         connection = get_db_connection()
         if not connection:
-            return jsonify({'error': '資料庫連接失敗'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = connection.cursor(dictionary=True)
         
@@ -497,19 +497,19 @@ def create_rental():
         motorcycle = cursor.fetchone()
         
         if not motorcycle:
-            return jsonify({'error': '找不到指定的摩托車'}), 404
+            return jsonify({'error': 'Motorcycle not found'}), 404
         
         # 從資料庫直接取得車型類別
         price_category = motorcycle['price_category']
         
         if price_category not in RENTAL_PRICE_MAP:
-            return jsonify({'error': '無效的車型類別'}), 400
+            return jsonify({'error': 'Invalid motorcycle price category'}), 400
         
         # 從價格對應表獲取總價
         duration = data['duration']
         
         if duration not in RENTAL_PRICE_MAP[price_category]:
-            return jsonify({'error': '無效的租借時長'}), 400
+            return jsonify({'error': 'Invalid rental duration'}), 400
         
         total_price = RENTAL_PRICE_MAP[price_category][duration]
         
@@ -551,7 +551,7 @@ def create_rental():
         
         return jsonify({
             'success': True,
-            'message': '租借預訂成功',
+            'message': 'Rental booking successful',
             'data': {
                 'rental_id': rental_id,
                 'total_price': total_price,
@@ -562,11 +562,11 @@ def create_rental():
     except Error as e:
         if connection:
             connection.rollback()
-        return jsonify({'error': f'資料庫錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
     except Exception as e:
         if connection:
             connection.rollback()
-        return jsonify({'error': f'伺服器錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
     finally:
         close_db_connection(connection, cursor)
 
@@ -584,7 +584,7 @@ def get_rentals():
         
         connection = get_db_connection()
         if not connection:
-            return jsonify({'error': '資料庫連接失敗'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = connection.cursor(dictionary=True)
         
@@ -630,7 +630,7 @@ def get_rentals():
         }), 200
         
     except Error as e:
-        return jsonify({'error': f'資料庫查詢錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Database query error: {str(e)}'}), 500
     finally:
         close_db_connection(connection, cursor)
 
@@ -643,7 +643,7 @@ def get_rental_detail(rental_id):
     try:
         connection = get_db_connection()
         if not connection:
-            return jsonify({'error': '資料庫連接失敗'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = connection.cursor(dictionary=True)
         
@@ -658,7 +658,7 @@ def get_rental_detail(rental_id):
         rental = cursor.fetchone()
         
         if not rental:
-            return jsonify({'error': '找不到租借記錄'}), 404
+            return jsonify({'error': 'Rental record not found'}), 404
         
         # 格式化結果
         rental['total_price'] = float(rental['total_price'])
@@ -674,7 +674,7 @@ def get_rental_detail(rental_id):
         }), 200
         
     except Error as e:
-        return jsonify({'error': f'資料庫查詢錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Database query error: {str(e)}'}), 500
     finally:
         close_db_connection(connection, cursor)
 
@@ -688,15 +688,15 @@ def update_rental_status(rental_id):
         data = request.get_json()
         
         if 'status' not in data:
-            return jsonify({'error': '缺少狀態欄位'}), 400
+            return jsonify({'error': 'Missing status field'}), 400
         
         valid_statuses = ['pending', 'confirmed', 'completed', 'cancelled']
         if data['status'] not in valid_statuses:
-            return jsonify({'error': '無效的狀態值'}), 400
+            return jsonify({'error': 'Invalid status value'}), 400
         
         connection = get_db_connection()
         if not connection:
-            return jsonify({'error': '資料庫連接失敗'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = connection.cursor()
         
@@ -705,17 +705,17 @@ def update_rental_status(rental_id):
         connection.commit()
         
         if cursor.rowcount == 0:
-            return jsonify({'error': '找不到租借記錄'}), 404
+            return jsonify({'error': 'Rental record not found'}), 404
         
         return jsonify({
             'success': True,
-            'message': '狀態更新成功'
+            'message': 'Status updated successfully'
         }), 200
         
     except Error as e:
         if connection:
             connection.rollback()
-        return jsonify({'error': f'資料庫錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
     finally:
         close_db_connection(connection, cursor)
 
@@ -728,7 +728,7 @@ def delete_rental(rental_id):
     try:
         connection = get_db_connection()
         if not connection:
-            return jsonify({'error': '資料庫連接失敗'}), 500
+            return jsonify({'error': 'Database connection failed'}), 500
         
         cursor = connection.cursor()
         
@@ -737,30 +737,31 @@ def delete_rental(rental_id):
         connection.commit()
         
         if cursor.rowcount == 0:
-            return jsonify({'error': '找不到租借記錄'}), 404
+            return jsonify({'error': 'Rental record not found'}), 404
         
         return jsonify({
             'success': True,
-            'message': '租借記錄已刪除'
+            'message': 'Rental record deleted'
         }), 200
         
     except Error as e:
         if connection:
             connection.rollback()
-        return jsonify({'error': f'資料庫錯誤: {str(e)}'}), 500
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
     finally:
         close_db_connection(connection, cursor)
 
 @app.errorhandler(404)
 def not_found(error):
     """處理 404 錯誤"""
-    return jsonify({'error': '找不到請求的資源'}), 404
+    return jsonify({'error': 'Resource not found'}), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     """處理 500 錯誤"""
-    return jsonify({'error': '伺服器內部錯誤'}), 500
+    return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
     # 開發環境設定
     app.run(host='0.0.0.0', port=5000, debug=True)
+
