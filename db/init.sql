@@ -46,3 +46,28 @@ ON DUPLICATE KEY UPDATE
 ALTER TABLE motorcycles ADD INDEX idx_brand(brand);
 ALTER TABLE motorcycles ADD INDEX idx_moto_type(moto_type);
 ALTER TABLE motorcycles ADD INDEX idx_price_category(price_category);
+
+-- 建立租借記錄表格
+CREATE TABLE IF NOT EXISTS rental_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    motorcycle_id INT NOT NULL,
+    customer_name VARCHAR(100) NOT NULL,
+    customer_phone VARCHAR(20) NOT NULL,
+    customer_email VARCHAR(100),
+    branch VARCHAR(50) NOT NULL COMMENT '租借分店 (taipei, taichung, tainan)',
+    rental_date DATE NOT NULL COMMENT '租借日期',
+    start_time TIME NOT NULL COMMENT '開始時間',
+    duration VARCHAR(10) NOT NULL COMMENT '租借時長 (5h, 10h, 24h, 48h)',
+    end_datetime DATETIME NOT NULL COMMENT '預計歸還時間',
+    total_price DECIMAL(10, 2) NOT NULL COMMENT '總租金',
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT '狀態: pending, confirmed, completed, cancelled',
+    notes TEXT COMMENT '備註',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (motorcycle_id) REFERENCES motorcycles(id) ON DELETE CASCADE,
+    INDEX idx_motorcycle_id(motorcycle_id),
+    INDEX idx_branch(branch),
+    INDEX idx_rental_date(rental_date),
+    INDEX idx_status(status),
+    INDEX idx_end_datetime(end_datetime)
+) ENGINE=InnoDB;
