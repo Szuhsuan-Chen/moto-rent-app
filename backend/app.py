@@ -224,16 +224,16 @@ def get_motorcycles():
 def check_availability(motorcycle_id, branch, date, start_time, duration):
     """
     檢查摩托車在指定時間和分店的可用性
-    這是簡化版本，實際應該查詢租借記錄表
+    查詢租借記錄表來確認真實可用性
     """
     # 驗證日期格式
     if date:
         try:
             rental_date = datetime.strptime(date, '%Y-%m-%d')
-            current_date = datetime.now()
+            current_date = datetime.now().date()
             
             # 檢查日期是否在有效範圍內
-            if rental_date < current_date:
+            if rental_date.date() < current_date:
                 return {
                     'available': False,
                     'message': '選擇的日期已過期'
@@ -270,8 +270,47 @@ def check_availability(motorcycle_id, branch, date, start_time, duration):
             'message': '無效的租借時長'
         }
     
+    # 如果所有參數都有值，檢查租借記錄表
+    if all([motorcycle_id, branch, date, start_time, duration]):
+        try:
+            connection = get_db_connection()
+            if connection:
+                cursor = connection.cursor(dictionary=True)
+                
+                # 計算預計結束時間
+                start_datetime = datetime.strptime(f"{date} {start_time}", '%Y-%m-%d %H:%M')
+                duration_hours = int(duration.replace('h', ''))
+                end_datetime = start_datetime + datetime.timedelta(hours=duration_hours)
+                
+                # 查詢是否有衝突的租借記錄
+                query = """
+                    SELECT id FROM rental_records 
+                    WHERE motorcycle_id = %s 
+                    AND branch = %s
+                    AND status IN ('pending', 'confirmed')
+                    AND (
+                        (rental_date = %s AND start_time <= %s AND end_datetime > %s)
+                        OR (rental_date <= %s AND end_datetime > %s)
+                    )
+                """
+                cursor.execute(query, (
+                    motorcycle_id, branch, date, start_time, 
+                    start_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+                    date, start_datetime.strftime('%Y-%m-%d %H:%M:%S')
+                ))
+                conflict = cursor.fetchone()
+                
+                close_db_connection(connection, cursor)
+                
+                if conflict:
+                    return {
+                        'available': False,
+                        'message': '此時段已被預訂'
+                    }
+        except Exception as e:
+            print(f"檢查可用性錯誤: {e}")
+    
     # 如果所有檢查都通過，返回可用
-    # 實際應用中，這裡應該查詢租借記錄表來確認真實可用性
     return {
         'available': True,
         'message': '可以租借'
@@ -417,6 +456,300 @@ def get_price_categories():
         'success': True,
         'data': categories
     }), 200
+
+@app.route('/api/rentals', methods=['POST'])
+def create_rental():
+    """建立新的租借記錄"""
+    connection = None
+    cursor = None
+    
+    try:
+        data = request.get_json()
+        
+        # 驗證必要欄位
+        required_fields = ['motorcycle_id', 'customer_name', 'customer_phone', 
+                          'branch', 'rental_date', 'start_time', 'duration']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # 檢查摩托車可用性
+        availability = check_availability(
+            data['motorcycle_id'],
+            data['branch'],
+            data['rental_date'],
+            data['start_time'],
+            data['duration']
+        )
+        
+        if not availability['available']:
+            return jsonify({'error': availability['message']}), 400
+        
+        # 計算總價和結束時間
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'error': '資料庫連接失敗'}), 500
+        
+        cursor = connection.cursor(dictionary=True)
+        
+        # 獲取摩托車資訊（取得車型類別）
+        cursor.execute("SELECT price_category FROM motorcycles WHERE id = %s", (data['motorcycle_id'],))
+        motorcycle = cursor.fetchone()
+        
+        if not motorcycle:
+            return jsonify({'error': '找不到指定的摩托車'}), 404
+        
+        # 從資料庫直接取得車型類別
+        price_category = motorcycle['price_category']
+        
+        if price_category not in RENTAL_PRICE_MAP:
+            return jsonify({'error': '無效的車型類別'}), 400
+        
+        # 從價格對應表獲取總價
+        duration = data['duration']
+        
+        if duration not in RENTAL_PRICE_MAP[price_category]:
+            return jsonify({'error': '無效的租借時長'}), 400
+        
+        total_price = RENTAL_PRICE_MAP[price_category][duration]
+        
+        # 計算結束時間
+        duration_hours = int(duration.replace('h', ''))
+        start_datetime = datetime.strptime(
+            f"{data['rental_date']} {data['start_time']}", 
+            '%Y-%m-%d %H:%M'
+        )
+        end_datetime = start_datetime + datetime.timedelta(hours=duration_hours)
+        
+        # 插入租借記錄
+        insert_query = """
+            INSERT INTO rental_records 
+            (motorcycle_id, customer_name, customer_phone, customer_email, 
+             branch, rental_date, start_time, duration, end_datetime, 
+             total_price, status, notes)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        
+        # TODO: 未來可能需要付款流程，目前直接設為 'confirmed' 自動確認訂單
+        cursor.execute(insert_query, (
+            data['motorcycle_id'],
+            data['customer_name'],
+            data['customer_phone'],
+            data.get('customer_email', ''),
+            data['branch'],
+            data['rental_date'],
+            data['start_time'],
+            data['duration'],
+            end_datetime.strftime('%Y-%m-%d %H:%M:%S'),
+            total_price,
+            'confirmed',  # 直接確認，未來可改為 'pending' 等待付款或審核
+            data.get('notes', '')
+        ))
+        
+        connection.commit()
+        rental_id = cursor.lastrowid
+        
+        return jsonify({
+            'success': True,
+            'message': '租借預訂成功',
+            'data': {
+                'rental_id': rental_id,
+                'total_price': total_price,
+                'end_datetime': end_datetime.strftime('%Y-%m-%d %H:%M')
+            }
+        }), 201
+        
+    except Error as e:
+        if connection:
+            connection.rollback()
+        return jsonify({'error': f'資料庫錯誤: {str(e)}'}), 500
+    except Exception as e:
+        if connection:
+            connection.rollback()
+        return jsonify({'error': f'伺服器錯誤: {str(e)}'}), 500
+    finally:
+        close_db_connection(connection, cursor)
+
+@app.route('/api/rentals', methods=['GET'])
+def get_rentals():
+    """獲取租借記錄列表"""
+    connection = None
+    cursor = None
+    
+    try:
+        # 獲取查詢參數
+        status = request.args.get('status')
+        branch = request.args.get('branch')
+        customer_phone = request.args.get('customer_phone')
+        
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'error': '資料庫連接失敗'}), 500
+        
+        cursor = connection.cursor(dictionary=True)
+        
+        # 構建查詢
+        query = """
+            SELECT r.*, m.title as motorcycle_title, m.brand as motorcycle_brand
+            FROM rental_records r
+            JOIN motorcycles m ON r.motorcycle_id = m.id
+            WHERE 1=1
+        """
+        params = []
+        
+        if status:
+            query += " AND r.status = %s"
+            params.append(status)
+        
+        if branch:
+            query += " AND r.branch = %s"
+            params.append(branch)
+        
+        if customer_phone:
+            query += " AND r.customer_phone = %s"
+            params.append(customer_phone)
+        
+        query += " ORDER BY r.created_at DESC"
+        
+        cursor.execute(query, params)
+        rentals = cursor.fetchall()
+        
+        # 格式化結果
+        for rental in rentals:
+            rental['total_price'] = float(rental['total_price'])
+            rental['rental_date'] = rental['rental_date'].strftime('%Y-%m-%d')
+            rental['start_time'] = str(rental['start_time'])
+            rental['end_datetime'] = rental['end_datetime'].strftime('%Y-%m-%d %H:%M')
+            rental['created_at'] = rental['created_at'].strftime('%Y-%m-%d %H:%M:%S')
+            rental['updated_at'] = rental['updated_at'].strftime('%Y-%m-%d %H:%M:%S')
+        
+        return jsonify({
+            'success': True,
+            'count': len(rentals),
+            'data': rentals
+        }), 200
+        
+    except Error as e:
+        return jsonify({'error': f'資料庫查詢錯誤: {str(e)}'}), 500
+    finally:
+        close_db_connection(connection, cursor)
+
+@app.route('/api/rentals/<int:rental_id>', methods=['GET'])
+def get_rental_detail(rental_id):
+    """獲取單一租借記錄詳情"""
+    connection = None
+    cursor = None
+    
+    try:
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'error': '資料庫連接失敗'}), 500
+        
+        cursor = connection.cursor(dictionary=True)
+        
+        query = """
+            SELECT r.*, m.title as motorcycle_title, m.brand as motorcycle_brand,
+                   m.image as motorcycle_image, m.price_category as motorcycle_price_category
+            FROM rental_records r
+            JOIN motorcycles m ON r.motorcycle_id = m.id
+            WHERE r.id = %s
+        """
+        cursor.execute(query, (rental_id,))
+        rental = cursor.fetchone()
+        
+        if not rental:
+            return jsonify({'error': '找不到租借記錄'}), 404
+        
+        # 格式化結果
+        rental['total_price'] = float(rental['total_price'])
+        rental['rental_date'] = rental['rental_date'].strftime('%Y-%m-%d')
+        rental['start_time'] = str(rental['start_time'])
+        rental['end_datetime'] = rental['end_datetime'].strftime('%Y-%m-%d %H:%M')
+        rental['created_at'] = rental['created_at'].strftime('%Y-%m-%d %H:%M:%S')
+        rental['updated_at'] = rental['updated_at'].strftime('%Y-%m-%d %H:%M:%S')
+        
+        return jsonify({
+            'success': True,
+            'data': rental
+        }), 200
+        
+    except Error as e:
+        return jsonify({'error': f'資料庫查詢錯誤: {str(e)}'}), 500
+    finally:
+        close_db_connection(connection, cursor)
+
+@app.route('/api/rentals/<int:rental_id>', methods=['PATCH'])
+def update_rental_status(rental_id):
+    """更新租借記錄狀態"""
+    connection = None
+    cursor = None
+    
+    try:
+        data = request.get_json()
+        
+        if 'status' not in data:
+            return jsonify({'error': '缺少狀態欄位'}), 400
+        
+        valid_statuses = ['pending', 'confirmed', 'completed', 'cancelled']
+        if data['status'] not in valid_statuses:
+            return jsonify({'error': '無效的狀態值'}), 400
+        
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'error': '資料庫連接失敗'}), 500
+        
+        cursor = connection.cursor()
+        
+        query = "UPDATE rental_records SET status = %s WHERE id = %s"
+        cursor.execute(query, (data['status'], rental_id))
+        connection.commit()
+        
+        if cursor.rowcount == 0:
+            return jsonify({'error': '找不到租借記錄'}), 404
+        
+        return jsonify({
+            'success': True,
+            'message': '狀態更新成功'
+        }), 200
+        
+    except Error as e:
+        if connection:
+            connection.rollback()
+        return jsonify({'error': f'資料庫錯誤: {str(e)}'}), 500
+    finally:
+        close_db_connection(connection, cursor)
+
+@app.route('/api/rentals/<int:rental_id>', methods=['DELETE'])
+def delete_rental(rental_id):
+    """刪除租借記錄"""
+    connection = None
+    cursor = None
+    
+    try:
+        connection = get_db_connection()
+        if not connection:
+            return jsonify({'error': '資料庫連接失敗'}), 500
+        
+        cursor = connection.cursor()
+        
+        query = "DELETE FROM rental_records WHERE id = %s"
+        cursor.execute(query, (rental_id,))
+        connection.commit()
+        
+        if cursor.rowcount == 0:
+            return jsonify({'error': '找不到租借記錄'}), 404
+        
+        return jsonify({
+            'success': True,
+            'message': '租借記錄已刪除'
+        }), 200
+        
+    except Error as e:
+        if connection:
+            connection.rollback()
+        return jsonify({'error': f'資料庫錯誤: {str(e)}'}), 500
+    finally:
+        close_db_connection(connection, cursor)
 
 @app.errorhandler(404)
 def not_found(error):
