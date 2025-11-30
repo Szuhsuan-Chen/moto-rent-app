@@ -22,8 +22,9 @@ function App() {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
         
-        const data = await response.json()
-        setBikesData(data)
+        const result = await response.json()
+        // Backend returns { count, data }, extract the data array
+        setBikesData(result.data || [])
       } catch (error) {
         console.error('獲取摩托車資料時發生錯誤:', error)
         setError(error.message)

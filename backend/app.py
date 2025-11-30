@@ -200,7 +200,6 @@ def get_motorcycles():
             result.append(moto_data)
         
         return jsonify({
-            'success': True,
             'count': len(result),
             'data': result,
             'filters_applied': {
@@ -345,7 +344,6 @@ def get_motorcycle_detail(motorcycle_id):
         motorcycle['prices'] = price_info  # 返回所有時長的價格
         
         return jsonify({
-            'success': True,
             'data': motorcycle
         }), 200
         
@@ -373,7 +371,6 @@ def get_brands():
         brands = [row[0] for row in cursor.fetchall()]
         
         return jsonify({
-            'success': True,
             'data': brands
         }), 200
         
@@ -399,7 +396,6 @@ def get_types():
         types = [row[0] for row in cursor.fetchall()]
         
         return jsonify({
-            'success': True,
             'data': types
         }), 200
         
@@ -436,7 +432,6 @@ def get_branches():
     ]
     
     return jsonify({
-        'success': True,
         'data': branches
     }), 200
 
@@ -453,7 +448,6 @@ def get_price_categories():
     ]
     
     return jsonify({
-        'success': True,
         'data': categories
     }), 200
 
@@ -550,7 +544,6 @@ def create_rental():
         rental_id = cursor.lastrowid
         
         return jsonify({
-            'success': True,
             'message': 'Rental booking successful',
             'data': {
                 'rental_id': rental_id,
@@ -624,7 +617,6 @@ def get_rentals():
             rental['updated_at'] = rental['updated_at'].strftime('%Y-%m-%d %H:%M:%S')
         
         return jsonify({
-            'success': True,
             'count': len(rentals),
             'data': rentals
         }), 200
@@ -669,7 +661,6 @@ def get_rental_detail(rental_id):
         rental['updated_at'] = rental['updated_at'].strftime('%Y-%m-%d %H:%M:%S')
         
         return jsonify({
-            'success': True,
             'data': rental
         }), 200
         
@@ -708,7 +699,6 @@ def update_rental_status(rental_id):
             return jsonify({'error': 'Rental record not found'}), 404
         
         return jsonify({
-            'success': True,
             'message': 'Status updated successfully'
         }), 200
         
@@ -740,7 +730,6 @@ def delete_rental(rental_id):
             return jsonify({'error': 'Rental record not found'}), 404
         
         return jsonify({
-            'success': True,
             'message': 'Rental record deleted'
         }), 200
         
