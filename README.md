@@ -42,12 +42,22 @@ moto-rent-app/
    cd moto-rent-app
    ```
 
-2. **使用 Docker Compose 啟動所有服務**:
+2. **設置環境變數**:
+   ```bash
+   # 複製環境變數範本檔案
+   cp .env.example .env
+   
+   # 編輯 .env 檔案，填入您的資料庫密碼
+   # DB_PASSWORD=your_secure_password_here
+   # MYSQL_ROOT_PASSWORD=your_secure_password_here
+   ```
+
+3. **使用 Docker Compose 啟動所有服務**:
    ```bash
    docker-compose up --build
    ```
 
-3. **等待所有服務啟動完成**，然後開啟瀏覽器訪問:
+4. **等待所有服務啟動完成**，然後開啟瀏覽器訪問:
    - 前端應用: http://localhost:3000
    - 後端 API: http://localhost:5000
    - MySQL 資料庫: localhost:3306
@@ -87,10 +97,17 @@ curl http://localhost:5000/api/motorcycles/type/跑車
 
 ## 資料庫配置
 
+資料庫配置透過環境變數檔案 (`.env`) 管理：
+
 - **資料庫名稱**: mydb
 - **用戶名**: root
-- **密碼**: example
+- **密碼**: 在 `.env` 檔案中設置
 - **端口**: 3306
+
+**重要安全提示**: 
+- ⚠️ 請勿將 `.env` 檔案提交到 Git
+- ✅ `.env.example` 提供了環境變數的範本
+- ✅ 每位開發者應該複製 `.env.example` 並設置自己的密碼
 
 MySQL 資料庫會在第一次啟動時自動執行 `db/init.sql` 腳本來創建表格和插入範例資料。
 
@@ -116,12 +133,19 @@ python app.py
 
 ### 資料庫連接
 
-開發模式下確保 MySQL 正在運行，並更新後端的環境變數:
+開發模式下確保 MySQL 正在運行，並從 `.env` 檔案載入環境變數，或手動設置:
 
 ```bash
+# Windows PowerShell
+$env:DB_HOST="localhost"
+$env:DB_USER="root"
+$env:DB_PASSWORD="your_password"
+$env:DB_NAME="mydb"
+
+# Linux/macOS
 export DB_HOST=localhost
 export DB_USER=root
-export DB_PASSWORD=example
+export DB_PASSWORD=your_password
 export DB_NAME=mydb
 ```
 
