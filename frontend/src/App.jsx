@@ -90,6 +90,11 @@ function App() {
     fetchMotorcycles(filters)
   }
 
+  // 重置到初始狀態
+  const handleReset = () => {
+    fetchMotorcycles()
+  }
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
@@ -136,6 +141,7 @@ function App() {
           {bikesData.map(bike => (
             <BikeCard 
               key={bike.id}
+              id={bike.id}
               image={bike.image}
               title={bike.title}
               brand={bike.brand}
@@ -148,6 +154,13 @@ function App() {
               fuelTankCapacity={bike.fuelTankCapacity}
               seatHeight={bike.seatHeight}
               weight={bike.weight}
+              filterData={{
+                branch: currentFilters.branch || '',
+                date: currentFilters.date || '',
+                startTime: currentFilters.startTime || '',
+                duration: currentFilters.duration || ''
+              }}
+              onReset={handleReset}
             />
           ))}
         </div>

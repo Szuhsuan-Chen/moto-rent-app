@@ -2,7 +2,7 @@
 from flask_cors import CORS
 import mysql.connector
 from mysql.connector import Error
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 app = Flask(__name__)
@@ -279,7 +279,7 @@ def check_availability(motorcycle_id, branch, date, start_time, duration):
                 # 計算預計結束時間
                 start_datetime = datetime.strptime(f"{date} {start_time}", '%Y-%m-%d %H:%M')
                 duration_hours = int(duration.replace('h', ''))
-                end_datetime = start_datetime + datetime.timedelta(hours=duration_hours)
+                end_datetime = start_datetime + timedelta(hours=duration_hours)
                 
                 # 查詢是否有衝突的租借記錄
                 query = """
@@ -513,7 +513,7 @@ def create_rental():
             f"{data['rental_date']} {data['start_time']}", 
             '%Y-%m-%d %H:%M'
         )
-        end_datetime = start_datetime + datetime.timedelta(hours=duration_hours)
+        end_datetime = start_datetime + timedelta(hours=duration_hours)
         
         # 插入租借記錄
         insert_query = """
