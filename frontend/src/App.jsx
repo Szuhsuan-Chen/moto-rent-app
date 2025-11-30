@@ -10,24 +10,36 @@ function App() {
   const [bikesData, setBikesData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [currentFilters, setCurrentFilters] = useState({})
 
   // 從後端 API 獲取摩托車資料
-  useEffect(() => {
-    const fetchMotorcycles = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('http://localhost:5000/api/motorcycles')
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        
-        const result = await response.json()
-        // Backend returns { count, data }, extract the data array
-        setBikesData(result.data || [])
-      } catch (error) {
-        console.error('獲取摩托車資料時發生錯誤:', error)
-        setError(error.message)
+  const fetchMotorcycles = async (filters = {}) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // 構建查詢參數
+      const params = new URLSearchParams()
+      if (filters.branch) params.append('branch', filters.branch)
+      if (filters.date) params.append('date', filters.date)
+      if (filters.startTime) params.append('start_time', filters.startTime)
+      if (filters.duration) params.append('duration', filters.duration)
+      if (filters.priceCategory) params.append('price_category', filters.priceCategory)
+      
+      const url = `http://localhost:5000/api/motorcycles${params.toString() ? '?' + params.toString() : ''}`
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      // Backend returns { count, data }, extract the data array
+      setBikesData(result.data || [])
+      setCurrentFilters(filters)
+    } catch (error) {
+      console.error('獲取摩托車資料時發生錯誤:', error)
+      setError(error.message)
         
         // 如果 API 失敗，使用預設資料作為備份
         const fallbackData = [
@@ -68,8 +80,15 @@ function App() {
       }
     }
 
+  // 初始載入所有資料
+  useEffect(() => {
     fetchMotorcycles()
   }, [])
+
+  // 處理查詢按鈕點擊
+  const handleSearch = (filters) => {
+    fetchMotorcycles(filters)
+  }
 
   if (loading) {
     return (
@@ -88,11 +107,22 @@ function App() {
       <Navbar/>
 
       {/* Hero 區塊 */}
-      <Hero/>
+      <Hero onSearch={handleSearch}/>
 
       {/* 內容區塊（車輛卡片之後會放這） */}
       <div className="container py-5">
-        {/* <h2 className="mb-4">🔥 熱門車款</h2> */}
+        {/* 顯示篩選資訊 */}
+        {Object.keys(currentFilters).some(key => currentFilters[key]) && (
+          <div className="alert alert-info mb-4" role="alert">
+            <strong>篩選結果：</strong>
+            {currentFilters.branch && ` 分店: ${currentFilters.branch}`}
+            {currentFilters.date && ` | 日期: ${currentFilters.date}`}
+            {currentFilters.startTime && ` | 時間: ${currentFilters.startTime}`}
+            {currentFilters.duration && ` | 時長: ${currentFilters.duration}`}
+            {currentFilters.priceCategory && ` | 車型: ${currentFilters.priceCategory}`}
+            <span className="ms-3">共找到 {bikesData.length} 台車</span>
+          </div>
+        )}
         
         {/* 顯示錯誤訊息（如果有的話） */}
         {error && (
