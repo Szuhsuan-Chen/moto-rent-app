@@ -75,24 +75,81 @@ docker-compose down -v
 
 ## API 端點
 
-### 摩托車相關 API
+本專案提供完整的 RESTful API，詳細的 API 文檔以 OpenAPI 3.0 規範撰寫。
 
-- `GET /api/motorcycles` - 獲取所有摩托車
-- `GET /api/motorcycles/<id>` - 獲取特定摩托車
-- `GET /api/motorcycles/brand/<brand>` - 根據品牌篩選
-- `GET /api/motorcycles/type/<type>` - 根據類型篩選
+### API 文檔
+
+- **OpenAPI 規範檔案**: `backend/openapi.yaml`
+- **API 文檔**: `backend/API_DOCUMENTATION.md`
+
+您可以使用以下工具查看和測試 API：
+- [Swagger Editor](https://editor.swagger.io/) - 將 `openapi.yaml` 內容貼上即可查看互動式文檔
+- [Swagger UI](https://swagger.io/tools/swagger-ui/) - 本地部署 API 文檔瀏覽器
+- [Postman](https://www.postman.com/) - 匯入 `openapi.yaml` 檔案以自動生成 API 測試集合
+- VS Code 擴充套件: OpenAPI (Swagger) Editor
+
+#### 使用 Postman 測試 API
+1. 開啟 Postman
+2. 點擊 **Import** 按鈕
+3. 選擇 `backend/openapi.yaml` 檔案
+4. Postman 會自動生成所有 API 端點的請求範例
+5. 確保後端服務運行在 `http://localhost:5000` 後即可開始測試
+
+### 主要 API 端點
+
+#### 健康檢查
+- `GET /api/health` - 檢查 API 服務和資料庫連接狀態
+
+#### 摩托車相關
+- `GET /api/motorcycles` - 獲取摩托車列表（支援多種篩選參數）
+  - 參數: `branch`, `date`, `start_time`, `duration`, `price_category`, `moto_type`, `brand`
+- `GET /api/motorcycles/{motorcycle_id}` - 獲取特定摩托車詳細資訊及所有時段價格
+
+#### 租賃相關
+- `POST /api/rentals` - 建立新的租賃預約
+- `GET /api/rentals` - 獲取租賃記錄列表（支援狀態、分店、電話號碼篩選）
+- `GET /api/rentals/{rental_id}` - 獲取特定租賃記錄詳情
+- `PATCH /api/rentals/{rental_id}` - 更新租賃狀態
+- `DELETE /api/rentals/{rental_id}` - 刪除租賃記錄
+
+#### 基本資料
+- `GET /api/brands` - 獲取所有摩托車品牌
+- `GET /api/types` - 獲取所有摩托車類型
+- `GET /api/branches` - 獲取所有分店資訊
+- `GET /api/price-categories` - 獲取價格分類資訊
 
 ### 範例 API 調用
 
 ```bash
+# 檢查 API 健康狀態
+curl http://localhost:5000/api/health
+
 # 獲取所有摩托車
 curl http://localhost:5000/api/motorcycles
 
-# 獲取特定品牌的摩托車
-curl http://localhost:5000/api/motorcycles/brand/KAWASAKI
+# 根據分店和日期篩選摩托車
+curl "http://localhost:5000/api/motorcycles?branch=taipei&date=2025-12-15&duration=24h"
 
-# 獲取特定類型的摩托車
-curl http://localhost:5000/api/motorcycles/type/跑車
+# 獲取特定摩托車詳情
+curl http://localhost:5000/api/motorcycles/1
+
+# 建立租賃預約
+curl -X POST http://localhost:5000/api/rentals \
+  -H "Content-Type: application/json" \
+  -d '{
+    "motorcycle_id": 1,
+    "customer_name": "王小明",
+    "customer_phone": "0912345678",
+    "customer_email": "wang@email.com",
+    "branch": "taipei",
+    "rental_date": "2025-12-15",
+    "start_time": "14:00",
+    "duration": "24h",
+    "notes": "請準備大型安全帽"
+  }'
+
+# 獲取所有品牌
+curl http://localhost:5000/api/brands
 ```
 
 ## 資料庫配置

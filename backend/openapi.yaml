@@ -1,0 +1,968 @@
+openapi: 3.0.3
+info:
+  title: MotoRentR API
+  version: 1.0.0
+  description: |
+    Full-stack motorcycle rental system API for MotoRentR.
+    Includes health check, motorcycles listing, rental booking, and basic metadata.
+
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      description: Check API service and database connection status.
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: healthy
+                database: connected
+        '500':
+          description: Service or database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Internal server error
+
+  /api/motorcycles:
+    get:
+      summary: List motorcycles
+      description: Get a list of motorcycles with optional filters.
+      parameters:
+        - in: query
+          name: branch
+          schema:
+            type: string
+            enum: [taipei, taichung, tainan]
+          required: false
+          description: Branch of rental shop.
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          required: false
+          description: Rental date (YYYY-MM-DD).
+        - in: query
+          name: start_time
+          schema:
+            type: string
+            pattern: '^[0-2][0-9]:[0-5][0-9]$'
+          required: false
+          description: Start time (HH:MM, 24h).
+        - in: query
+          name: duration
+          schema:
+            type: string
+            enum: [5h, 10h, 24h, 48h]
+          required: false
+          description: Rental duration.
+        - in: query
+          name: price_category
+          schema:
+            type: string
+            enum: [type-ss, type-s, type-a, type-b, type-c, type-minibike]
+          required: false
+          description: Price category of motorcycle.
+        - in: query
+          name: moto_type
+          schema:
+            type: string
+            enum: [cruiser, naked, sport, superbike]
+          required: false
+          description: Type/category of motorcycle.
+        - in: query
+          name: brand
+          schema:
+            type: string
+          required: false
+          description: Brand name (e.g. KAWASAKI, YAMAHA, HONDA).
+      responses:
+        '200':
+          description: Motorcycles list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MotorcyclesListResponse'
+              example:
+                count: 2
+                data:
+                  - id: 1
+                    image: /KAWASAKI_NINJA_400.png
+                    title: KAWASAKI NINJA 400
+                    brand: KAWASAKI
+                    price_category: type-s
+                    price: 5000
+                    moto_type: sport
+                    engine_displacement: 399cc
+                    max_horsepower: 45hp
+                    max_torque: 38Nm
+                    engine_type: 水冷四行程並列雙汽缸 DOHC 4V
+                    fuel_tank_capacity: 14L
+                    seat_height: 785mm
+                    weight: 168kg
+                    availability:
+                      available: true
+                      message: Available for rent
+                    filter_info:
+                      branch: taipei
+                      date: 2025-12-15
+                      start_time: 14:00
+                      duration: 24h
+                filters_applied:
+                  branch: taipei
+                  date: 2025-12-15
+                  start_time: null
+                  duration: 24h
+                  price_category: type-s
+                  moto_type: null
+                  brand: null
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+
+  /api/motorcycles/{motorcycle_id}:
+    get:
+      summary: Get motorcycle details
+      description: Get detailed information for a single motorcycle, including prices for all durations.
+      parameters:
+        - in: path
+          name: motorcycle_id
+          required: true
+          schema:
+            type: integer
+          description: Motorcycle ID.
+      responses:
+        '200':
+          description: Motorcycle details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/MotorcycleWithPrices'
+              example:
+                data:
+                  id: 1
+                  image: /KAWASAKI_NINJA_400.png
+                  title: KAWASAKI NINJA 400
+                  brand: KAWASAKI
+                  price_category: type-s
+                  moto_type: sport
+                  engine_displacement: 399cc
+                  max_horsepower: 45hp
+                  max_torque: 38Nm
+                  engine_type: 水冷四行程並列雙汽缸 DOHC 4V
+                  fuel_tank_capacity: 14L
+                  seat_height: 785mm
+                  weight: 168kg
+                  prices:
+                    '5h': 2500
+                    '10h': 4000
+                    '24h': 5000
+                    '48h': 9000
+        '404':
+          description: Motorcycle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Motorcycle not found
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+
+  /api/rentals:
+    post:
+      summary: Create rental booking
+      description: Create a new rental record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RentalCreateRequest'
+            example:
+              motorcycle_id: 1
+              customer_name: 王小明
+              customer_phone: '0912345678'
+              customer_email: wang@email.com
+              branch: taipei
+              rental_date: 2025-12-15
+              start_time: '14:00'
+              duration: 24h
+              notes: 請準備大型安全帽
+      responses:
+        '201':
+          description: Rental booking successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentalCreateResponse'
+              example:
+                message: Rental booking successful
+                data:
+                  rental_id: 123
+                  total_price: 5000
+                  end_datetime: '2025-12-16 14:00'
+        '400':
+          description: Missing required fields or time slot already booked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingFields:
+                  summary: Missing fields
+                  value:
+                    error: Missing required fields
+                timeSlotBooked:
+                  summary: Time slot already booked
+                  value:
+                    error: This time slot is already booked
+        '404':
+          description: Motorcycle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Motorcycle not found
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+    get:
+      summary: List rental records
+      description: Get a list of rental records with optional filters.
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, confirmed, completed, cancelled]
+          required: false
+          description: Rental status.
+        - in: query
+          name: branch
+          schema:
+            type: string
+            enum: [taipei, taichung, tainan]
+          required: false
+          description: Branch of rental shop.
+        - in: query
+          name: customer_phone
+          schema:
+            type: string
+          required: false
+          description: Customer phone number.
+      responses:
+        '200':
+          description: Rentals list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RentalsListResponse'
+              example:
+                count: 2
+                data:
+                  - id: 123
+                    motorcycle_id: 1
+                    motorcycle_title: KAWASAKI NINJA 400
+                    motorcycle_brand: KAWASAKI
+                    customer_name: 王小明
+                    customer_phone: '0912345678'
+                    customer_email: wang@email.com
+                    branch: taipei
+                    rental_date: 2025-12-15
+                    start_time: '14:00:00'
+                    duration: 24h
+                    end_datetime: '2025-12-16 14:00'
+                    total_price: 5000
+                    status: confirmed
+                    notes: 請準備大型安全帽
+                    created_at: '2025-12-01 10:30:00'
+                    updated_at: '2025-12-01 10:30:00'
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+
+  /api/rentals/{rental_id}:
+    get:
+      summary: Get rental details
+      description: Get details for a single rental record.
+      parameters:
+        - in: path
+          name: rental_id
+          required: true
+          schema:
+            type: integer
+          description: Rental record ID.
+      responses:
+        '200':
+          description: Rental details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RentalDetail'
+              example:
+                data:
+                  id: 123
+                  motorcycle_id: 1
+                  motorcycle_title: KAWASAKI NINJA 400
+                  motorcycle_brand: KAWASAKI
+                  motorcycle_image: /KAWASAKI_NINJA_400.png
+                  motorcycle_price_category: type-s
+                  customer_name: 王小明
+                  customer_phone: '0912345678'
+                  customer_email: wang@email.com
+                  branch: taipei
+                  rental_date: 2025-12-15
+                  start_time: '14:00:00'
+                  duration: 24h
+                  end_datetime: '2025-12-16 14:00'
+                  total_price: 5000
+                  status: confirmed
+                  notes: 請準備大型安全帽
+                  created_at: '2025-12-01 10:30:00'
+                  updated_at: '2025-12-01 10:30:00'
+        '404':
+          description: Rental not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Rental not found
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+    patch:
+      summary: Update rental status
+      description: Update the status of a rental record.
+      parameters:
+        - in: path
+          name: rental_id
+          required: true
+          schema:
+            type: integer
+          description: Rental record ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RentalStatusUpdateRequest'
+            example:
+              status: completed
+      responses:
+        '200':
+          description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicMessageResponse'
+              example:
+                message: Status updated successfully
+        '400':
+          description: Missing status or invalid value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingStatus:
+                  summary: Missing status
+                  value:
+                    error: Missing status field
+                invalidStatus:
+                  summary: Invalid status
+                  value:
+                    error: Invalid status value
+        '404':
+          description: Rental not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Rental not found
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+    delete:
+      summary: Delete rental record
+      description: Delete a rental record.
+      parameters:
+        - in: path
+          name: rental_id
+          required: true
+          schema:
+            type: integer
+          description: Rental record ID.
+      responses:
+        '200':
+          description: Rental record deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BasicMessageResponse'
+              example:
+                message: Rental record deleted
+        '404':
+          description: Rental not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Rental not found
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+
+  /api/brands:
+    get:
+      summary: Get brands
+      description: Get all motorcycle brands.
+      responses:
+        '200':
+          description: List of brands
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandListResponse'
+              example:
+                data:
+                  - BMW
+                  - DUCATI
+                  - HONDA
+                  - KAWASAKI
+                  - SUZUKI
+                  - YAMAHA
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+
+  /api/types:
+    get:
+      summary: Get motorcycle types
+      description: Get all motorcycle type values.
+      responses:
+        '200':
+          description: List of motorcycle types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TypeListResponse'
+              example:
+                data:
+                  - cruiser
+                  - naked
+                  - sport
+                  - superbike
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+
+  /api/branches:
+    get:
+      summary: Get branches
+      description: Get all branch information.
+      responses:
+        '200':
+          description: List of branches
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BranchListResponse'
+              example:
+                data:
+                  - id: taipei
+                    name: 台北旗艦店
+                    address: 台北市信義區信義路五段7號
+                    phone: 02-2345-6789
+                    hours: 10:00 - 22:00
+                  - id: taichung
+                    name: 台中概念店
+                    address: 台中市西屯區台灣大道三段99號
+                    phone: 04-2345-6789
+                    hours: 10:00 - 22:00
+                  - id: tainan
+                    name: 台南體驗店
+                    address: 台南市中西區中正路123號
+                    phone: 06-2345-6789
+                    hours: 10:00 - 22:00
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+
+  /api/price-categories:
+    get:
+      summary: Get price categories
+      description: Get price category information (24h base price).
+      responses:
+        '200':
+          description: List of price categories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceCategoryListResponse'
+              example:
+                data:
+                  - id: type-ss
+                    name: TYPE-SS
+                    price: 6000
+                  - id: type-s
+                    name: TYPE-S
+                    price: 5000
+                  - id: type-a
+                    name: TYPE-A
+                    price: 4000
+                  - id: type-b
+                    name: TYPE-B
+                    price: 3000
+                  - id: type-c
+                    name: TYPE-C
+                    price: 2000
+                  - id: type-minibike
+                    name: TYPE-MiniBike
+                    price: 1000
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: healthy
+        database:
+          type: string
+          example: connected
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    BasicMessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    MotorcycleAvailability:
+      type: object
+      properties:
+        available:
+          type: boolean
+        message:
+          type: string
+
+    MotorcycleFilterInfo:
+      type: object
+      properties:
+        branch:
+          type: string
+          enum: [taipei, taichung, tainan]
+        date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          nullable: true
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+        duration:
+          type: string
+          enum: [5h, 10h, 24h, 48h]
+
+    Motorcycle:
+      type: object
+      properties:
+        id:
+          type: integer
+        image:
+          type: string
+        title:
+          type: string
+        brand:
+          type: string
+        price_category:
+          type: string
+          enum: [type-ss, type-s, type-a, type-b, type-c, type-minibike]
+        price:
+          type: number
+          format: float
+          description: Price for selected duration (if applicable).
+        moto_type:
+          type: string
+          enum: [cruiser, naked, sport, superbike]
+        engine_displacement:
+          type: string
+        max_horsepower:
+          type: string
+        max_torque:
+          type: string
+        engine_type:
+          type: string
+          description: Descriptive text (can be in Chinese).
+        fuel_tank_capacity:
+          type: string
+        seat_height:
+          type: string
+        weight:
+          type: string
+        availability:
+          $ref: '#/components/schemas/MotorcycleAvailability'
+        filter_info:
+          $ref: '#/components/schemas/MotorcycleFilterInfo'
+
+    MotorcycleWithPrices:
+      type: object
+      properties:
+        id:
+          type: integer
+        image:
+          type: string
+        title:
+          type: string
+        brand:
+          type: string
+        price_category:
+          type: string
+          enum: [type-ss, type-s, type-a, type-b, type-c, type-minibike]
+        moto_type:
+          type: string
+          enum: [cruiser, naked, sport, superbike]
+        engine_displacement:
+          type: string
+        max_horsepower:
+          type: string
+        max_torque:
+          type: string
+        engine_type:
+          type: string
+        fuel_tank_capacity:
+          type: string
+        seat_height:
+          type: string
+        weight:
+          type: string
+        prices:
+          type: object
+          properties:
+            '5h':
+              type: number
+            '10h':
+              type: number
+            '24h':
+              type: number
+            '48h':
+              type: number
+
+    MotorcyclesListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Motorcycle'
+        filters_applied:
+          type: object
+          properties:
+            branch:
+              type: string
+              nullable: true
+              enum: [taipei, taichung, tainan, null]
+            date:
+              type: string
+              format: date
+              nullable: true
+            start_time:
+              type: string
+              nullable: true
+            duration:
+              type: string
+              nullable: true
+              enum: [5h, 10h, 24h, 48h, null]
+            price_category:
+              type: string
+              nullable: true
+              enum: [type-ss, type-s, type-a, type-b, type-c, type-minibike, null]
+            moto_type:
+              type: string
+              nullable: true
+              enum: [cruiser, naked, sport, superbike, null]
+            brand:
+              type: string
+              nullable: true
+
+    RentalCreateRequest:
+      type: object
+      properties:
+        motorcycle_id:
+          type: integer
+        customer_name:
+          type: string
+        customer_phone:
+          type: string
+        customer_email:
+          type: string
+          nullable: true
+        branch:
+          type: string
+          enum: [taipei, taichung, tainan]
+        rental_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          pattern: '^[0-2][0-9]:[0-5][0-9]$'
+        duration:
+          type: string
+          enum: [5h, 10h, 24h, 48h]
+        notes:
+          type: string
+          nullable: true
+      required:
+        - motorcycle_id
+        - customer_name
+        - customer_phone
+        - branch
+        - rental_date
+        - start_time
+        - duration
+
+    RentalCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            rental_id:
+              type: integer
+            total_price:
+              type: number
+              format: float
+            end_datetime:
+              type: string
+      required:
+        - message
+        - data
+
+    Rental:
+      type: object
+      properties:
+        id:
+          type: integer
+        motorcycle_id:
+          type: integer
+        motorcycle_title:
+          type: string
+        motorcycle_brand:
+          type: string
+        customer_name:
+          type: string
+        customer_phone:
+          type: string
+        customer_email:
+          type: string
+          nullable: true
+        branch:
+          type: string
+          enum: [taipei, taichung, tainan]
+        rental_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+        duration:
+          type: string
+          enum: [5h, 10h, 24h, 48h]
+        end_datetime:
+          type: string
+        total_price:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [pending, confirmed, completed, cancelled]
+        notes:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+        updated_at:
+          type: string
+
+    RentalDetail:
+      allOf:
+        - $ref: '#/components/schemas/Rental'
+        - type: object
+          properties:
+            motorcycle_image:
+              type: string
+            motorcycle_price_category:
+              type: string
+              enum: [type-ss, type-s, type-a, type-b, type-c, type-minibike]
+
+    RentalsListResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rental'
+
+    RentalStatusUpdateRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, confirmed, completed, cancelled]
+      required:
+        - status
+
+    BrandListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: string
+
+    TypeListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: string
+            enum: [cruiser, naked, sport, superbike]
+
+    Branch:
+      type: object
+      properties:
+        id:
+          type: string
+          enum: [taipei, taichung, tainan]
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        hours:
+          type: string
+
+    BranchListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Branch'
+
+    PriceCategory:
+      type: object
+      properties:
+        id:
+          type: string
+          enum: [type-ss, type-s, type-a, type-b, type-c, type-minibike]
+        name:
+          type: string
+        price:
+          type: number
+          format: float
+
+    PriceCategoryListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceCategory'
