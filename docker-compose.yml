@@ -8,10 +8,14 @@ services:
     stdin_open: true
     tty: true
     depends_on:
-      - backend
+      - python-backend
 
-  backend:
-    build: ./backend
+  # Python Backend Service
+  # 這是自定義的服務名稱,可以根據需求自行命名
+  # 此名稱用於在 Docker Compose 網絡中識別和引用此服務
+  # 其他服務可以使用 "python-backend" 作為主機名來連接此服務
+  python-backend:
+    build: ./python-backend
     ports:
       - "5000:5000"
     depends_on:

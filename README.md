@@ -20,7 +20,7 @@ moto-rent-app/
 │   ├── src/
 │   │   ├── App.jsx
 │   │   └── components/
-└── backend/                    # Flask 後端 API
+└── python-backend/             # Flask 後端 API
 │   ├── Dockerfile
 │   ├── app.py
 │   └── requirements.txt
@@ -79,8 +79,8 @@ docker-compose down -v
 
 ### API 文檔
 
-- **OpenAPI 規範檔案**: `backend/openapi.yaml`
-- **API 文檔**: `backend/API_DOCUMENTATION.md`
+- **OpenAPI 規範檔案**: `python-backend/openapi.yaml`
+- **API 文檔**: `python-backend/API_DOCUMENTATION.md`
 
 您可以使用以下工具查看和測試 API：
 - [Swagger Editor](https://editor.swagger.io/) - 將 `openapi.yaml` 內容貼上即可查看互動式文檔
@@ -91,7 +91,7 @@ docker-compose down -v
 #### 使用 Postman 測試 API
 1. 開啟 Postman
 2. 點擊 **Import** 按鈕
-3. 選擇 `backend/openapi.yaml` 檔案
+3. 選擇 `python-backend/openapi.yaml` 檔案
 4. Postman 會自動生成所有 API 端點的請求範例
 5. 確保後端服務運行在 `http://localhost:5000` 後即可開始測試
 
@@ -183,7 +183,7 @@ npm run dev
 ### 後端開發
 
 ```bash
-cd backend
+cd python-backend
 pip install -r requirements.txt
 python app.py
 ```
@@ -240,7 +240,7 @@ docker-compose logs
 
 # 查看特定服務的日誌
 docker-compose logs frontend
-docker-compose logs backend
+docker-compose logs python-backend
 docker-compose logs db
 ```
 
