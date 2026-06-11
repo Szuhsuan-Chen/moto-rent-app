@@ -7,6 +7,9 @@ dist-ssr/
 build/
 .out/
 
+# Java / Maven build output
+backend/target/
+
 # Log files
 logs/
 *.log

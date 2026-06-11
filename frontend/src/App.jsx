@@ -26,7 +26,7 @@ function App() {
       if (filters.duration) params.append('duration', filters.duration)
       if (filters.priceCategory) params.append('price_category', filters.priceCategory)
       
-      const url = `http://localhost:5000/api/motorcycles${params.toString() ? '?' + params.toString() : ''}`
+      const url = `http://localhost:5001/api/motorcycles${params.toString() ? '?' + params.toString() : ''}`
       const response = await fetch(url)
       
       if (!response.ok) {

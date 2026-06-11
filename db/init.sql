@@ -64,10 +64,12 @@ CREATE TABLE IF NOT EXISTS rental_records (
     notes TEXT COMMENT '備註',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (motorcycle_id) REFERENCES motorcycles(id) ON DELETE CASCADE,
-    INDEX idx_motorcycle_id(motorcycle_id),
-    INDEX idx_branch(branch),
-    INDEX idx_rental_date(rental_date),
-    INDEX idx_status(status),
-    INDEX idx_end_datetime(end_datetime)
+    FOREIGN KEY (motorcycle_id) REFERENCES motorcycles(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- 建立索引以提升查詢效能
+ALTER TABLE rental_records ADD INDEX idx_motorcycle_id(motorcycle_id);
+ALTER TABLE rental_records ADD INDEX idx_branch(branch);
+ALTER TABLE rental_records ADD INDEX idx_rental_date(rental_date);
+ALTER TABLE rental_records ADD INDEX idx_status(status);
+ALTER TABLE rental_records ADD INDEX idx_end_datetime(end_datetime);

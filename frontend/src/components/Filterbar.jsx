@@ -48,8 +48,8 @@ function Filterbar({ onSearch }) {
         name="date" 
         value={filters.date}
         onChange={handleChange}
-        min="2025-09-01" 
-        max="2025-12-31" 
+        min="2026-07-01" 
+        max="2026-07-31" 
       />
 
       {/* 開始時間 */}

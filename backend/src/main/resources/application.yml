@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    # 從環境變數讀取，冒號後是預設值（本地開發用）
+    url: jdbc:mysql://${DB_HOST:db}:3306/${DB_NAME:mydb}?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false&characterEncoding=UTF-8
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:rootpassword}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    property-naming-strategy: SNAKE_CASE      # camelCase Java → snake_case JSON 自動轉換
+    serialization:
+      write-dates-as-timestamps: false         # LocalDate/Time → ISO 字串，不用陣列
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml          # XML mapper 檔案位置
+  configuration:
+    map-underscore-to-camel-case: true              # DB snake_case → Java camelCase 自動對應
+    default-fetch-size: 100
+    default-statement-timeout: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
