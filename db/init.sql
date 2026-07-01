@@ -53,9 +53,9 @@ ON DUPLICATE KEY UPDATE
     price_category = VALUES(price_category);
 
 -- 建立索引以提升查詢效能
-ALTER TABLE motorcycles ADD INDEX idx_brand(brand);
 ALTER TABLE motorcycles ADD INDEX idx_moto_type(moto_type);
-ALTER TABLE motorcycles ADD INDEX idx_price_category(price_category);
+-- 複合索引：brand 選擇性最高放前面，已涵蓋 idx_brand 單一索引
+ALTER TABLE motorcycles ADD INDEX idx_brand_price_type (brand, price_category, moto_type);
 
 -- 建立租借記錄表格
 CREATE TABLE IF NOT EXISTS rental_records (
@@ -78,8 +78,10 @@ CREATE TABLE IF NOT EXISTS rental_records (
 ) ENGINE=InnoDB;
 
 -- 建立索引以提升查詢效能
-ALTER TABLE rental_records ADD INDEX idx_motorcycle_id(motorcycle_id);
-ALTER TABLE rental_records ADD INDEX idx_branch(branch);
-ALTER TABLE rental_records ADD INDEX idx_rental_date(rental_date);
-ALTER TABLE rental_records ADD INDEX idx_status(status);
-ALTER TABLE rental_records ADD INDEX idx_end_datetime(end_datetime);
+ALTER TABLE rental_records ADD INDEX idx_customer_phone(customer_phone);
+-- 複合索引：status 選擇性較高放前面，已涵蓋 branch 和 status 單一索引
+ALTER TABLE rental_records ADD INDEX idx_status_branch (status, branch);
+-- 複合索引：FOR UPDATE 鎖定查詢用
+ALTER TABLE rental_records ADD INDEX idx_motorcycle_status (motorcycle_id, status);
+-- 複合索引：衝突判斷查詢用，等值欄位放前面，範圍查詢 status 放最後
+ALTER TABLE rental_records ADD INDEX idx_motorcycle_branch_status (motorcycle_id, branch, status);
