@@ -36,7 +36,17 @@ INSERT INTO motorcycles (
     ('/HONDA_CB650R.png', 'HONDA CB650R', 'HONDA', 'type-a', 'naked', 649, '95hp', '64Nm', '水冷四行程並列四汽缸 DOHC 4V', 15.4, 810, 200),
     ('/DUCATI_MONSTER_821.png', 'DUCATI MONSTER 821', 'DUCATI', 'type-s', 'naked', 821, '109hp', '86Nm', '水冷四行程L型雙汽缸 Desmodromic 4V', 17.5, 785, 205),
     ('/BMW_S1000RR.png', 'BMW S1000RR', 'BMW', 'type-ss', 'superbike', 999, '207hp', '113Nm', '水冷四行程並列四汽缸 DOHC 4V', 16.5, 824, 197),
-    ('/HARLEY_DAVIDSON_SPORTSTER.png', 'HARLEY-DAVIDSON SPORTSTER', 'HARLEY-DAVIDSON', 'type-a', 'cruiser', 883, '50hp', '68Nm', '氣冷四行程V型雙汽缸 OHV 2V', 12.5, 760, 256)
+    ('/HARLEY_DAVIDSON_SPORTSTER.png', 'HARLEY-DAVIDSON SPORTSTER', 'HARLEY-DAVIDSON', 'type-a', 'cruiser', 883, '50hp', '68Nm', '氣冷四行程V型雙汽缸 OHV 2V', 12.5, 760, 256),
+    ('/HONDA_CB750_HORNET.png', 'HONDA CB750 HORNET', 'HONDA', 'type-a', 'naked', 755, '92hp', '75Nm', '水冷四行程並列雙汽缸 DOHC 4V', 15.1, 795, 190),
+    ('/HONDA_CBR500R.png', 'HONDA CBR500R', 'HONDA', 'type-b', 'sport', 471, '47hp', '43Nm', '水冷四行程並列雙汽缸 DOHC 4V', 17.3, 790, 192),
+    ('/YAMAHA_YZF_R7.png', 'YAMAHA YZF-R7', 'YAMAHA', 'type-a', 'sport', 689, '73hp', '67Nm', '水冷四行程並列雙汽缸 DOHC 4V', 13.0, 835, 188),
+    ('/YAMAHA_MT07.png', 'YAMAHA MT-07', 'YAMAHA', 'type-a', 'naked', 689, '73hp', '67Nm', '水冷四行程並列雙汽缸 DOHC 4V', 13.2, 805, 184),
+    ('/KAWASAKI_NINJA_650.png', 'KAWASAKI NINJA 650', 'KAWASAKI', 'type-a', 'sport', 649, '68hp', '65Nm', '水冷四行程並列雙汽缸 DOHC 4V', 15.0, 790, 193),
+    ('/KAWASAKI_ZX4RR.png', 'KAWASAKI ZX-4RR', 'KAWASAKI', 'type-s', 'superbike', 399, '77hp', '40Nm', '水冷四行程並列四汽缸 DOHC 4V', 15.0, 800, 183),
+    ('/DUCATI_STREETFIGHTER_V2.png', 'DUCATI STREETFIGHTER V2', 'DUCATI', 'type-ss', 'naked', 955, '153hp', '101Nm', '水冷四行程L型雙汽缸 Desmodromic 4V', 17.0, 845, 178),
+    ('/BMW_F900R.png', 'BMW F900R', 'BMW', 'type-a', 'naked', 895, '105hp', '92Nm', '水冷四行程並列雙汽缸 DOHC 4V', 13.0, 810, 211),
+    ('/TRIUMPH_STREET_TRIPLE.png', 'TRIUMPH STREET TRIPLE R', 'TRIUMPH', 'type-s', 'naked', 765, '118hp', '79Nm', '水冷四行程並列三汽缸 DOHC 4V', 17.4, 825, 166),
+    ('/SUZUKI_GSX_S750.png', 'SUZUKI GSX-S750', 'SUZUKI', 'type-a', 'naked', 749, '114hp', '81Nm', '水冷四行程並列四汽缸 DOHC 4V', 16.0, 820, 213)
 ON DUPLICATE KEY UPDATE
     title = VALUES(title),
     brand = VALUES(brand),
