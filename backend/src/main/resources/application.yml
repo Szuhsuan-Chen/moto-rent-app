@@ -9,7 +9,7 @@ spring:
     password: ${DB_PASSWORD:rootpassword}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jackson:
-    property-naming-strategy: SNAKE_CASE      # camelCase Java → snake_case JSON 自動轉換
+    property-naming-strategy: SNAKE_CASE        # camelCase Java → snake_case JSON 自動轉換
     serialization:
       write-dates-as-timestamps: false         # LocalDate/Time → ISO 字串，不用陣列
 

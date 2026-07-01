@@ -20,13 +20,13 @@ public class Motorcycle {
     private String brand;              // 品牌（如 Honda、Yamaha）
     private String priceCategory;      // 價格分類（如 economy、standard、premium）
     private String motoType;           // 車種類型（如 scooter、sport、naked）
-    private String engineDisplacement; // 排氣量（如 125cc、650cc）
-    private String maxHorsepower;      // 最大馬力
-    private String maxTorque;          // 最大扭力
-    private String engineType;         // 引擎型式（如 單缸、雙缸）
-    private String fuelTankCapacity;   // 油箱容量（公升）
-    private String seatHeight;         // 座墊高度（毫米）
-    private String weight;             // 車重（公斤）
+    private Integer engineDisplacement; // 排氣量（cc）
+    private String maxHorsepower;       // 最大馬力
+    private String maxTorque;           // 最大扭力
+    private String engineType;          // 引擎型式（如 單缸、雙缸）
+    private Double fuelTankCapacity;    // 油箱容量（公升）
+    private Integer seatHeight;         // 座墊高度（毫米）
+    private Integer weight;             // 車重（公斤）
     private LocalDateTime createdAt;   // 資料建立時間
     private LocalDateTime updatedAt;   // 資料最後更新時間
 }

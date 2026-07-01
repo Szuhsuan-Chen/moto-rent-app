@@ -6,6 +6,14 @@ import Hero from './components/Hero'
 import Footer from './components/Footer'
 import BikeCard from './components/BikeCard'
 
+const toCamelCase = (str) => str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+const transformKeys = (obj) => {
+  if (Array.isArray(obj)) return obj.map(transformKeys)
+  if (obj !== null && typeof obj === 'object')
+    return Object.fromEntries(Object.entries(obj).map(([k, v]) => [toCamelCase(k), transformKeys(v)]))
+  return obj
+}
+
 function App() {
   const [bikesData, setBikesData] = useState([])
   const [loading, setLoading] = useState(true)
@@ -35,7 +43,8 @@ function App() {
       
       const result = await response.json()
       // Backend returns { count, data }, extract the data array
-      setBikesData(result.data || [])
+      // transformKeys: 在 API 邊界把 snake_case JSON 轉成 JS 慣用的 camelCase
+      setBikesData(transformKeys(result.data || []))
       setCurrentFilters(filters)
     } catch (error) {
       console.error('獲取摩托車資料時發生錯誤:', error)
@@ -50,13 +59,13 @@ function App() {
             brand: "KAWASAKI",
             price: "2400",
             motoType: "跑車",
-            engineDisplacement: "140cc",
+            engineDisplacement: 140,
             maxHorsepower: "45hp",
             maxTorque: "38Nm",
             engineType: "水冷四行程單汽缸 SOHC 4V",
-            fuelTankCapacity: "14L",
-            seatHeight: "785mm",
-            weight: "168kg"
+            fuelTankCapacity: 14.0,
+            seatHeight: 785,
+            weight: 168
           },
           {
             id: 2,
@@ -65,13 +74,13 @@ function App() {
             brand: "YAMAHA",
             price: "2200",
             motoType: "跑車",
-            engineDisplacement: "321cc",
+            engineDisplacement: 321,
             maxHorsepower: "42hp",
             maxTorque: "29.6Nm",
             engineType: "水冷四行程並列雙汽缸 DOHC 4V",
-            fuelTankCapacity: "14L",
-            seatHeight: "780mm",
-            weight: "169kg"
+            fuelTankCapacity: 14.0,
+            seatHeight: 780,
+            weight: 169
           }
         ]
         setBikesData(fallbackData)
@@ -139,7 +148,7 @@ function App() {
         <div className="row">
           {/* 動態產生車輛卡片 */}
           {bikesData.map(bike => (
-            <BikeCard 
+            <BikeCard
               key={bike.id}
               id={bike.id}
               image={bike.image}
@@ -154,6 +163,7 @@ function App() {
               fuelTankCapacity={bike.fuelTankCapacity}
               seatHeight={bike.seatHeight}
               weight={bike.weight}
+              availability={bike.availability}
               filterData={{
                 branch: currentFilters.branch || '',
                 date: currentFilters.date || '',

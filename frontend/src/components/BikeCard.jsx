@@ -2,23 +2,25 @@ import React, { useState } from 'react';
 import './BikeCard.css';
 import BookingSuccessModal from './BookingSuccessModal';
 
-function BikeCard({ 
+function BikeCard({
   id,
-  image, 
-  title, 
-  brand, 
-  price, 
-  motoType, 
-  engineDisplacement, 
-  maxHorsepower, 
-  maxTorque, 
-  engineType, 
-  fuelTankCapacity, 
-  seatHeight, 
+  image,
+  title,
+  brand,
+  price,
+  motoType,
+  engineDisplacement,
+  maxHorsepower,
+  maxTorque,
+  engineType,
+  fuelTankCapacity,
+  seatHeight,
   weight,
+  availability,
   filterData,
   onReset
 }) {
+  const isAvailable = !availability || availability.available
   const [showModal, setShowModal] = useState(false);
   const [rentalInfo, setRentalInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -89,23 +91,26 @@ function BikeCard({
                       <p className='card-text'>引擎型式 {engineType}</p>
                   </div>
                   <div className="col-6 text-end">
-                      <p className="card-text">引擎 {engineDisplacement}</p>
-                      <p className="card-text">油箱容量 {fuelTankCapacity}</p>
-                      <p className="card-text">座高 {seatHeight}</p>
-                      <p className="card-text">重量 {weight}</p>
+                      <p className="card-text">引擎 {engineDisplacement}cc</p>
+                      <p className="card-text">油箱容量 {fuelTankCapacity}L</p>
+                      <p className="card-text">座高 {seatHeight}mm</p>
+                      <p className="card-text">重量 {weight}kg</p>
                   </div>
               </div>
               <div className='row mt-5'>
                   <div className='col-6'>
                       <p className="card-text fw-bold">${price}</p>
+                      {!isAvailable && (
+                        <p className="card-text text-danger small">{availability.message}</p>
+                      )}
                   </div>
                   <div className='col-6'>
-                      <button 
-                        className="btn btn-primary w-100" 
+                      <button
+                        className={`btn w-100 ${isAvailable ? 'btn-primary' : 'btn-secondary'}`}
                         onClick={handleRentNow}
-                        disabled={isLoading}
+                        disabled={isLoading || !isAvailable}
                       >
-                        {isLoading ? '處理中...' : 'Rent Now'}
+                        {isLoading ? '處理中...' : isAvailable ? 'Rent Now' : '已被預訂'}
                       </button>
                   </div>
               </div>
