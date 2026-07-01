@@ -1,11 +1,11 @@
 # 摩托車租賃應用程式
 
-這是一個使用 React + Flask + MySQL + Docker 構建的摩托車租賃應用程式。
+這是一個使用 React + Spring Boot + MyBatis + MySQL + Docker 構建的摩托車租賃應用程式。
 
 ## 技術棧
 
-- **前端**: React 18 + Vite + Bootstrap 5
-- **後端**: Python Flask + SQLAlchemy
+- **前端**: React 19 + Vite + Bootstrap 5
+- **後端**: Spring Boot 3 (Java 21) + MyBatis
 - **資料庫**: MySQL 8.0
 - **容器化**: Docker + Docker Compose
 
@@ -14,30 +14,43 @@
 ```
 moto-rent-app/
 ├── docker-compose.yml          # Docker Compose 配置
-├── frontend/                   # React 前端應用
+├── .env.example                 # 環境變數範本
+├── frontend/                    # React 前端應用
 │   ├── Dockerfile
 │   ├── package.json
-│   ├── src/
-│   │   ├── App.jsx
-│   │   └── components/
-└── backend/                    # Flask 後端 API
+│   └── src/
+├── backend/                     # Spring Boot 後端 API
 │   ├── Dockerfile
-│   ├── app.py
-│   └── requirements.txt
-└── db/                        # 資料庫初始化腳本
-    └── init.sql
+│   ├── pom.xml
+│   ├── openapi.yaml             # OpenAPI 3.0 規範
+│   ├── API_DOCUMENTATION.md     # API 文件
+│   └── src/main/java/com/motorent/
+│       ├── controller/          # REST controllers
+│       ├── service/              # 業務邏輯
+│       ├── repository/           # MyBatis mapper 介面
+│       ├── entity/ dto/          # 實體與資料傳輸物件
+│       └── resources/mapper/     # MyBatis XML mapper
+├── db/
+│   └── init.sql                 # 資料庫初始化腳本
+└── docs/
+    └── SQL_QUERIES.md
 ```
 
-## 快速開始
+## 快速開始（Docker，推薦）
 
 ### 前置條件
 
-- 安裝 [Docker](https://www.docker.com/get-started)
-- 安裝 [Docker Compose](https://docs.docker.com/compose/install/)
+- 安裝 [Docker Desktop](https://www.docker.com/get-started)（已內建 Docker Compose v2）
+
+確認安裝：
+```bash
+docker --version
+docker compose version
+```
 
 ### 運行應用程式
 
-1. **克隆存儲庫並進入目錄**:
+1. **進入專案目錄**:
    ```bash
    cd moto-rent-app
    ```
@@ -46,54 +59,80 @@ moto-rent-app/
    ```bash
    # 複製環境變數範本檔案
    cp .env.example .env
-   
-   # 編輯 .env 檔案，填入您的資料庫密碼
+
+   # 編輯 .env 檔案，填入你的資料庫密碼
    # DB_PASSWORD=your_secure_password_here
    # MYSQL_ROOT_PASSWORD=your_secure_password_here
    ```
+   注意：`DB_HOST` 必須維持 `db`（Docker 內部服務名稱），不要改成 `localhost`。
 
-3. **使用 Docker Compose 啟動所有服務**:
+3. **使用 Docker Compose 建置並啟動所有服務**:
    ```bash
-   docker-compose up --build
+   docker compose up --build
    ```
+   首次執行需下載 image 並編譯後端，約需 3–5 分鐘。啟動順序由 `depends_on` 控制：**MySQL → Backend → Frontend**。
 
 4. **等待所有服務啟動完成**，然後開啟瀏覽器訪問:
-   - 前端應用: http://localhost:3000
-   - 後端 API: http://localhost:5000
-   - MySQL 資料庫: localhost:3306
+
+   | 服務 | 網址 |
+   |------|------|
+   | 前端應用 | http://localhost:3000 |
+   | 後端 API | http://localhost:5001 |
+   | MySQL 資料庫 | localhost:3307 |
 
 ### 停止應用程式
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
-如果想要清除所有數據（包括資料庫）:
+如果想要清除所有資料（包括資料庫）:
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
 
-## API 端點
+## 本地開發模式（不使用 Docker）
 
-本專案提供完整的 RESTful API，詳細的 API 文檔以 OpenAPI 3.0 規範撰寫。
+需要本機已安裝 Node.js 18+、JDK 21、Maven，以及一個可連線的 MySQL 實例。
 
-### API 文檔
+### 前端
 
-- **OpenAPI 規範檔案**: `backend/openapi.yaml`
-- **API 文檔**: `backend/API_DOCUMENTATION.md`
+```bash
+cd frontend
+npm install
+npm run dev
+```
+預設會在 http://localhost:5173 啟動 Vite 開發伺服器。
 
-您可以使用以下工具查看和測試 API：
-- [Swagger Editor](https://editor.swagger.io/) - 將 `openapi.yaml` 內容貼上即可查看互動式文檔
-- [Swagger UI](https://swagger.io/tools/swagger-ui/) - 本地部署 API 文檔瀏覽器
+### 後端
+
+```bash
+cd backend
+
+# 設定環境變數（需先有本機 MySQL 且已建立資料庫）
+export DB_HOST=localhost
+export DB_USER=root
+export DB_PASSWORD=your_password
+export DB_NAME=mydb
+
+mvn spring-boot:run
+```
+後端預設監聽 8080 埠（`backend/src/main/resources/application.yml`）。
+
+### 資料庫
+
+MySQL 需先手動執行 `db/init.sql` 建立資料表與範例資料（Docker 模式下會在容器第一次啟動時自動執行）。
+
+## API 文檔
+
+本專案提供完整的 RESTful API，詳細規範以 OpenAPI 3.0 撰寫。
+
+- **OpenAPI 規範檔案**: [backend/openapi.yaml](backend/openapi.yaml)
+- **API 文檔**: [backend/API_DOCUMENTATION.md](backend/API_DOCUMENTATION.md)
+
+可使用以下工具查看與測試 API：
+- [Swagger Editor](https://editor.swagger.io/) - 貼上 `openapi.yaml` 內容即可查看互動式文檔
 - [Postman](https://www.postman.com/) - 匯入 `openapi.yaml` 檔案以自動生成 API 測試集合
-- VS Code 擴充套件: OpenAPI (Swagger) Editor
-
-#### 使用 Postman 測試 API
-1. 開啟 Postman
-2. 點擊 **Import** 按鈕
-3. 選擇 `backend/openapi.yaml` 檔案
-4. Postman 會自動生成所有 API 端點的請求範例
-5. 確保後端服務運行在 `http://localhost:5000` 後即可開始測試
 
 ### 主要 API 端點
 
@@ -101,8 +140,7 @@ docker-compose down -v
 - `GET /api/health` - 檢查 API 服務和資料庫連接狀態
 
 #### 摩托車相關
-- `GET /api/motorcycles` - 獲取摩托車列表（支援多種篩選參數）
-  - 參數: `branch`, `date`, `start_time`, `duration`, `price_category`, `moto_type`, `brand`
+- `GET /api/motorcycles` - 獲取摩托車列表（支援 `branch`, `date`, `start_time`, `duration`, `price_category`, `moto_type`, `brand` 等篩選參數）
 - `GET /api/motorcycles/{motorcycle_id}` - 獲取特定摩托車詳細資訊及所有時段價格
 
 #### 租賃相關
@@ -122,19 +160,16 @@ docker-compose down -v
 
 ```bash
 # 檢查 API 健康狀態
-curl http://localhost:5000/api/health
+curl http://localhost:5001/api/health
 
 # 獲取所有摩托車
-curl http://localhost:5000/api/motorcycles
+curl http://localhost:5001/api/motorcycles
 
 # 根據分店和日期篩選摩托車
-curl "http://localhost:5000/api/motorcycles?branch=taipei&date=2025-12-15&duration=24h"
-
-# 獲取特定摩托車詳情
-curl http://localhost:5000/api/motorcycles/1
+curl "http://localhost:5001/api/motorcycles?branch=taipei&date=2025-12-15&duration=24h"
 
 # 建立租賃預約
-curl -X POST http://localhost:5000/api/rentals \
+curl -X POST http://localhost:5001/api/rentals \
   -H "Content-Type: application/json" \
   -d '{
     "motorcycle_id": 1,
@@ -147,10 +182,9 @@ curl -X POST http://localhost:5000/api/rentals \
     "duration": "24h",
     "notes": "請準備大型安全帽"
   }'
-
-# 獲取所有品牌
-curl http://localhost:5000/api/brands
 ```
+
+> 注意：以上為透過 Docker Compose 啟動時的後端 host 端口（5001）。若以 `mvn spring-boot:run` 本地啟動，後端埠為 8080。
 
 ## 資料庫配置
 
@@ -159,90 +193,38 @@ curl http://localhost:5000/api/brands
 - **資料庫名稱**: mydb
 - **用戶名**: root
 - **密碼**: 在 `.env` 檔案中設置
-- **端口**: 3306
+- **Host 端口**（Docker）: 3307（容器內部仍為 3306）
 
-**重要安全提示**: 
-- ⚠️ 請勿將 `.env` 檔案提交到 Git
-- ✅ `.env.example` 提供了環境變數的範本
-- ✅ 每位開發者應該複製 `.env.example` 並設置自己的密碼
+**重要安全提示**:
+- 請勿將 `.env` 檔案提交到 Git
+- `.env.example` 提供了環境變數的範本，每位開發者應複製後設置自己的密碼
 
 MySQL 資料庫會在第一次啟動時自動執行 `db/init.sql` 腳本來創建表格和插入範例資料。
 
-## 開發模式
-
-如果你想要在開發模式下運行應用程式：
-
-### 前端開發
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### 後端開發
-
-```bash
-cd backend
-pip install -r requirements.txt
-python app.py
-```
-
-### 資料庫連接
-
-開發模式下確保 MySQL 正在運行，並從 `.env` 檔案載入環境變數，或手動設置:
-
-```bash
-# Windows PowerShell
-$env:DB_HOST="localhost"
-$env:DB_USER="root"
-$env:DB_PASSWORD="your_password"
-$env:DB_NAME="mydb"
-
-# Linux/macOS
-export DB_HOST=localhost
-export DB_USER=root
-export DB_PASSWORD=your_password
-export DB_NAME=mydb
-```
-
-## 功能特色
-
-- ✅ 響應式網頁設計
-- ✅ 摩托車資料展示
-- ✅ 品牌和類型篩選
-- ✅ RESTful API
-- ✅ Docker 容器化部署
-- ✅ MySQL 資料持久化
-- ✅ 錯誤處理和備援機制
-
 ## 故障排除
 
-### 常見問題
-
-1. **容器啟動失敗**
-   - 確保 Docker 正在運行
-   - 檢查端口 3000, 5000, 3306 是否被占用
-
-2. **資料庫連接失敗**
-   - 等待 MySQL 容器完全啟動（通常需要 30-60 秒）
-   - 檢查 `docker-compose logs db` 查看資料庫日誌
-
-3. **前端無法獲取資料**
-   - 確保後端服務正在運行
-   - 檢查瀏覽器開發者工具的網路標籤
+1. **容器啟動失敗** — 確保 Docker 正在運行；檢查端口 3000、5001、3307 是否被占用。
+2. **後端一直重啟或連線失敗** — 後端會等 MySQL 健康檢查通過才啟動，初次啟動可能需要等待 30–60 秒，屬正常現象。可用 `docker compose logs db` 查看資料庫日誌。
+3. **前端無法獲取資料** — 確認後端已啟動（`curl http://localhost:5001/api/health`），並檢查瀏覽器開發者工具的 Network 標籤。
 
 ### 查看日誌
 
 ```bash
 # 查看所有服務的日誌
-docker-compose logs
+docker compose logs -f
 
 # 查看特定服務的日誌
-docker-compose logs frontend
-docker-compose logs backend
-docker-compose logs db
+docker compose logs -f frontend
+docker compose logs -f backend
+docker compose logs -f db
 ```
+
+## 功能特色
+
+- 響應式網頁設計
+- 摩托車資料展示、品牌與類型篩選
+- 完整的租賃預約 RESTful API
+- Docker 容器化部署，MySQL 資料持久化
 
 ## 貢獻
 
