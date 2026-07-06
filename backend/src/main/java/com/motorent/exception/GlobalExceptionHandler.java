@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Map;
 
@@ -42,6 +43,12 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .orElse("Validation failed");
         return ResponseEntity.status(400).body(Map.of("error", message));
+    }
+
+    // @PathVariable/@RequestParam 型別轉換失敗時觸發（例如 /api/motorcycles/abc，id 應為 Long）
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        return ResponseEntity.status(400).body(Map.of("error", e.getName() + " has invalid format"));
     }
 
     // @Valid 驗證失敗時觸發（例如 @NotBlank 欄位為空）
