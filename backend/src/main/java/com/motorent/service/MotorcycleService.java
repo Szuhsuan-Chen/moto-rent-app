@@ -10,6 +10,7 @@ import com.motorent.repository.MotorcycleMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -22,7 +23,7 @@ public class MotorcycleService {
     @Autowired
     private PricingService pricingService;
 
-    public List<MotorcycleDto> findMotorcycles(String branch, String date, String startTime,
+    public List<MotorcycleDto> findMotorcycles(String branch, LocalDate date, String startTime,
                                                String duration, String priceCategory,
                                                String motoType, String brand) {
         // 把篩選參數包成物件傳給 MyBatis XML 動態查詢
@@ -64,7 +65,7 @@ public class MotorcycleService {
         return motorcycleMapper.findDistinctMotoTypes();
     }
 
-    private MotorcycleDto toListDto(Motorcycle moto, String branch, String date,
+    private MotorcycleDto toListDto(Motorcycle moto, String branch, LocalDate date,
                                     String startTime, String duration) {
         AvailabilityDto availability = availabilityService.check(
                 moto.getId(), branch, date, startTime, duration
@@ -88,7 +89,7 @@ public class MotorcycleService {
                 .availability(availability)
                 .filterInfo(FilterInfoDto.builder()
                         .branch(branch)
-                        .date(date)
+                        .date(date == null ? null : date.toString())
                         .startTime(startTime)
                         .duration(duration)
                         .build())

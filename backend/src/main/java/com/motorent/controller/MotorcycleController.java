@@ -2,14 +2,17 @@ package com.motorent.controller;
 
 import com.motorent.dto.MotorcycleDto;
 import com.motorent.service.MotorcycleService;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +34,9 @@ public class MotorcycleController {
             String branch,
 
             @RequestParam(required = false)
-            @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "date must be in format yyyy-MM-dd")
-            String date,
+            @DateTimeFormat(pattern = "yyyy-MM-dd")
+            @FutureOrPresent(message = "date must be today or a future date")
+            LocalDate date,
 
             @RequestParam(name = "start_time", required = false)
             @Pattern(regexp = "^\\d{2}:\\d{2}$", message = "start_time must be in format HH:mm")
@@ -61,7 +65,7 @@ public class MotorcycleController {
         // 保持 key 順序，維持與原 Flask API 相同的回傳格式
         Map<String, Object> filtersApplied = new LinkedHashMap<>();
         filtersApplied.put("branch", branch);
-        filtersApplied.put("date", date);
+        filtersApplied.put("date", date == null ? null : date.toString());
         filtersApplied.put("start_time", startTime);
         filtersApplied.put("duration", duration);
         filtersApplied.put("price_category", priceCategory);

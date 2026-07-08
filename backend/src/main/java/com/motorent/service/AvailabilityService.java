@@ -20,18 +20,8 @@ public class AvailabilityService {
 
     private static final List<String> VALID_BRANCHES = List.of("taipei", "taichung", "tainan");
 
-    public AvailabilityDto check(Long motorcycleId, String branch, String date,
+    public AvailabilityDto check(Long motorcycleId, String branch, LocalDate date,
                                   String startTime, String duration) {
-        if (date != null) {
-            try {
-                if (LocalDate.parse(date).isBefore(LocalDate.now())) {
-                    return AvailabilityDto.of(false, "Selected date has expired");
-                }
-            } catch (Exception e) {
-                return AvailabilityDto.of(false, "Incorrect date format");
-            }
-        }
-
         if (branch != null && !VALID_BRANCHES.contains(branch)) {
             return AvailabilityDto.of(false, "Invalid branch selection");
         }
@@ -50,11 +40,10 @@ public class AvailabilityService {
 
         if (motorcycleId != null && branch != null && date != null
                 && startTime != null && duration != null) {
-            LocalDate rentalDate = LocalDate.parse(date);
-            LocalDateTime startDatetime = LocalDateTime.of(rentalDate, LocalTime.parse(startTime));
+            LocalDateTime startDatetime = LocalDateTime.of(date, LocalTime.parse(startTime));
 
             long conflicts = rentalRecordMapper.countConflictingRentals(
-                    motorcycleId, branch, rentalDate, startDatetime
+                    motorcycleId, branch, date, startDatetime
             );
 
             if (conflicts > 0) {

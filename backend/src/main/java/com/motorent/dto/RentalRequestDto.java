@@ -1,8 +1,11 @@
 package com.motorent.dto;
 
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.time.LocalDate;
 
 // Request DTO: 接收前端 POST body，用 @Valid + @NotBlank 做輸入驗證
 @Data
@@ -22,8 +25,9 @@ public class RentalRequestDto {
     @NotBlank(message = "branch is required")
     private String branch;
 
-    @NotBlank(message = "rental_date is required")
-    private String rentalDate;
+    @NotNull(message = "rental_date is required")
+    @FutureOrPresent(message = "rental_date must be today or a future date")
+    private LocalDate rentalDate;
 
     @NotBlank(message = "start_time is required")
     private String startTime;

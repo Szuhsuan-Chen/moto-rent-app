@@ -59,7 +59,7 @@ public class RentalService {
         }
         Integer totalPrice = pricingService.getPrice(priceCategory, request.getDuration());
 
-        LocalDate rentalDate = LocalDate.parse(request.getRentalDate());
+        LocalDate rentalDate = request.getRentalDate();
         LocalTime startTime = LocalTime.parse(request.getStartTime());
         int durationHours = Integer.parseInt(request.getDuration().replace("h", ""));
         LocalDateTime endDatetime = LocalDateTime.of(rentalDate, startTime).plusHours(durationHours);
