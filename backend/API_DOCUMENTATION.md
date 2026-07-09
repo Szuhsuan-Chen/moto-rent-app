@@ -46,23 +46,78 @@ GET http://localhost:5000/api/health
 
 ### GET /api/motorcycles
 
-獲取摩托車列表，支援多種篩選條件。
+瀏覽摩托車目錄，**不查可用性**（`availability`、`filter_info` 一律為 `null`）。要查特定分店/時段的可用性請用下面的 `/api/motorcycles/availability`。
 
 **查詢參數**:
 
 | 參數 | 類型 | 必填 | 說明 | 範例 |
 |------|------|------|------|------|
-| `branch` | string | 否 | 租借分店 | `taipei`, `taichung`, `tainan` |
-| `date` | string | 否 | 租借日期 | `2025-12-01` (YYYY-MM-DD) |
-| `start_time` | string | 否 | 開始時間 | `14:00` (HH:MM) |
-| `duration` | string | 否 | 租借時長 | `5h`, `10h`, `24h`, `48h` |
 | `price_category` | string | 否 | 車型類別 | `type-ss`, `type-s`, `type-a`, `type-b`, `type-c`, `type-minibike` |
 | `moto_type` | string | 否 | 車型類型 | `sport`, `naked`, `superbike`, `cruiser` |
 | `brand` | string | 否 | 品牌 | `KAWASAKI`, `YAMAHA`, `HONDA` |
 
 **請求範例**:
 ```bash
-GET http://localhost:5000/api/motorcycles?branch=taipei&date=2025-12-15&duration=24h&price_category=type-s
+GET http://localhost:5000/api/motorcycles?price_category=type-s
+```
+
+**回應範例**:
+```json
+{
+  "count": 2,
+  "data": [
+    {
+      "id": 1,
+      "image": "/KAWASAKI_NINJA_400.png",
+      "title": "KAWASAKI NINJA 400",
+      "brand": "KAWASAKI",
+      "price_category": "type-s",
+      "price": 5000,
+      "moto_type": "sport",
+      "engine_displacement": "399cc",
+      "max_horsepower": "45hp",
+      "max_torque": "38Nm",
+      "engine_type": "水冷四行程並列雙汽缸 DOHC 4V",
+      "fuel_tank_capacity": "14L",
+      "seat_height": "785mm",
+      "weight": "168kg",
+      "availability": null,
+      "filter_info": null
+    }
+  ],
+  "filters_applied": {
+    "price_category": "type-s",
+    "moto_type": null,
+    "brand": null
+  }
+}
+```
+
+**狀態碼**:
+- `200`: 查詢成功
+- `500`: 資料庫錯誤
+
+---
+
+### GET /api/motorcycles/availability
+
+搜尋指定分店/時段的可用性。`branch`、`date`、`start_time`、`duration` **皆為必填**（全給才會真的查衝突，沒有「少給就略過檢查」的模糊狀態）。
+
+**查詢參數**:
+
+| 參數 | 類型 | 必填 | 說明 | 範例 |
+|------|------|------|------|------|
+| `branch` | string | 是 | 租借分店 | `taipei`, `taichung`, `tainan` |
+| `date` | string | 是 | 租借日期 | `2025-12-01` (YYYY-MM-DD) |
+| `start_time` | string | 是 | 開始時間 | `14:00` (HH:MM) |
+| `duration` | string | 是 | 租借時長 | `5h`, `10h`, `24h`, `48h` |
+| `price_category` | string | 否 | 車型類別 | `type-ss`, `type-s`, `type-a`, `type-b`, `type-c`, `type-minibike` |
+| `moto_type` | string | 否 | 車型類型 | `sport`, `naked`, `superbike`, `cruiser` |
+| `brand` | string | 否 | 品牌 | `KAWASAKI`, `YAMAHA`, `HONDA` |
+
+**請求範例**:
+```bash
+GET http://localhost:5000/api/motorcycles/availability?branch=taipei&date=2025-12-15&start_time=14:00&duration=24h&price_category=type-s
 ```
 
 **回應範例**:
@@ -100,7 +155,7 @@ GET http://localhost:5000/api/motorcycles?branch=taipei&date=2025-12-15&duration
   "filters_applied": {
     "branch": "taipei",
     "date": "2025-12-15",
-    "start_time": null,
+    "start_time": "14:00",
     "duration": "24h",
     "price_category": "type-s",
     "moto_type": null,
@@ -111,6 +166,7 @@ GET http://localhost:5000/api/motorcycles?branch=taipei&date=2025-12-15&duration
 
 **狀態碼**:
 - `200`: 查詢成功
+- `400`: 缺少必填參數或格式錯誤
 - `500`: 資料庫錯誤
 
 ---

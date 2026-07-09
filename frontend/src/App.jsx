@@ -26,15 +26,21 @@ function App() {
       setLoading(true)
       setError(null)
       
-      // 構建查詢參數
+      // branch/date/start_time/duration 要嘛全給、要嘛全不給：
+      // 全給才是「查可用性」，走 /motorcycles/availability；否則是單純瀏覽目錄，走 /motorcycles
+      const hasFullSearch = filters.branch && filters.date && filters.startTime && filters.duration
+      const endpoint = hasFullSearch ? '/api/motorcycles/availability' : '/api/motorcycles'
+
       const params = new URLSearchParams()
-      if (filters.branch) params.append('branch', filters.branch)
-      if (filters.date) params.append('date', filters.date)
-      if (filters.startTime) params.append('start_time', filters.startTime)
-      if (filters.duration) params.append('duration', filters.duration)
+      if (hasFullSearch) {
+        params.append('branch', filters.branch)
+        params.append('date', filters.date)
+        params.append('start_time', filters.startTime)
+        params.append('duration', filters.duration)
+      }
       if (filters.priceCategory) params.append('price_category', filters.priceCategory)
-      
-      const url = `http://localhost:5001/api/motorcycles${params.toString() ? '?' + params.toString() : ''}`
+
+      const url = `http://localhost:5001${endpoint}${params.toString() ? '?' + params.toString() : ''}`
       const response = await fetch(url)
       
       if (!response.ok) {

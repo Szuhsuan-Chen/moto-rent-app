@@ -27,22 +27,53 @@ public class MotorcycleController {
     @Autowired
     private MotorcycleService motorcycleService;
 
+    // 純瀏覽車輛目錄：不查可用性，只依 price_category/moto_type/brand 篩選
     @GetMapping("/motorcycles")
     public ResponseEntity<Map<String, Object>> getMotorcycles(
+            @RequestParam(name = "price_category", required = false)
+            @Pattern(regexp = "^(?:type-ss|type-s|type-a|type-b|type-c|type-minibike)$", message = "price_category is invalid")
+            String priceCategory,
+
+            @RequestParam(name = "moto_type", required = false)
+            @Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "moto_type format is invalid")
+            String motoType,
+
             @RequestParam(required = false)
+            @Size(max = 50, message = "brand is too long")
+            String brand
+    ) {
+        List<MotorcycleDto> data = motorcycleService.findMotorcycles(priceCategory, motoType, brand);
+
+        Map<String, Object> filtersApplied = new LinkedHashMap<>();
+        filtersApplied.put("price_category", priceCategory);
+        filtersApplied.put("moto_type", motoType);
+        filtersApplied.put("brand", brand);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("count", data.size());
+        response.put("data", data);
+        response.put("filters_applied", filtersApplied);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 搜尋指定分店/時段的可用性：branch/date/start_time/duration 皆為必填
+    @GetMapping("/motorcycles/availability")
+    public ResponseEntity<Map<String, Object>> searchAvailability(
+            @RequestParam
             @Pattern(regexp = "^(?:taipei|taichung|tainan)$", message = "branch must be one of: taipei, taichung, tainan")
             String branch,
 
-            @RequestParam(required = false)
+            @RequestParam
             @DateTimeFormat(pattern = "yyyy-MM-dd")
             @FutureOrPresent(message = "date must be today or a future date")
             LocalDate date,
 
-            @RequestParam(name = "start_time", required = false)
+            @RequestParam(name = "start_time")
             @Pattern(regexp = "^\\d{2}:\\d{2}$", message = "start_time must be in format HH:mm")
             String startTime,
 
-            @RequestParam(required = false)
+            @RequestParam
             @Pattern(regexp = "^(?:5h|10h|24h|48h)$", message = "duration must be one of: 5h, 10h, 24h, 48h")
             String duration,
 
@@ -58,14 +89,13 @@ public class MotorcycleController {
             @Size(max = 50, message = "brand is too long")
             String brand
     ) {
-        List<MotorcycleDto> data = motorcycleService.findMotorcycles(
+        List<MotorcycleDto> data = motorcycleService.searchAvailability(
                 branch, date, startTime, duration, priceCategory, motoType, brand
         );
 
-        // 保持 key 順序，維持與原 Flask API 相同的回傳格式
         Map<String, Object> filtersApplied = new LinkedHashMap<>();
         filtersApplied.put("branch", branch);
-        filtersApplied.put("date", date == null ? null : date.toString());
+        filtersApplied.put("date", date.toString());
         filtersApplied.put("start_time", startTime);
         filtersApplied.put("duration", duration);
         filtersApplied.put("price_category", priceCategory);

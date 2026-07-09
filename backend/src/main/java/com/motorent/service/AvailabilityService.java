@@ -17,6 +17,8 @@ public class AvailabilityService {
 
     public AvailabilityDto check(Long motorcycleId, String branch, LocalDate date,
                                   String startTime, String duration) {
+        if (motorcycleId != null && branch != null && date != null
+                && startTime != null && duration != null) {
         LocalDateTime startDatetime = LocalDateTime.of(date, LocalTime.parse(startTime));
 
         long conflicts = rentalRecordMapper.countConflictingRentals(
@@ -25,6 +27,7 @@ public class AvailabilityService {
 
         if (conflicts > 0) {
             return new AvailabilityDto(false, "This time slot is already booked");
+        }
         }
 
         return new AvailabilityDto(true, "Available for rent");

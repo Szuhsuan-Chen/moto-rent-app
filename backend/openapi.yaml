@@ -36,37 +36,12 @@ paths:
 
   /api/motorcycles:
     get:
-      summary: List motorcycles
-      description: Get a list of motorcycles with optional filters.
+      summary: List motorcycles (catalog)
+      description: >
+        Browse the motorcycle catalog. Does not check availability — use
+        /api/motorcycles/availability for that. `availability` and `filter_info`
+        are always null in the response.
       parameters:
-        - in: query
-          name: branch
-          schema:
-            type: string
-            enum: [taipei, taichung, tainan]
-          required: false
-          description: Branch of rental shop.
-        - in: query
-          name: date
-          schema:
-            type: string
-            format: date
-          required: false
-          description: Rental date (YYYY-MM-DD).
-        - in: query
-          name: start_time
-          schema:
-            type: string
-            pattern: '^[0-2][0-9]:[0-5][0-9]$'
-          required: false
-          description: Start time (HH:MM, 24h).
-        - in: query
-          name: duration
-          schema:
-            type: string
-            enum: [5h, 10h, 24h, 48h]
-          required: false
-          description: Rental duration.
         - in: query
           name: price_category
           schema:
@@ -111,6 +86,101 @@ paths:
                     fuel_tank_capacity: 14L
                     seat_height: 785mm
                     weight: 168kg
+                    availability: null
+                    filter_info: null
+                filters_applied:
+                  price_category: type-s
+                  moto_type: null
+                  brand: null
+        '500':
+          description: Database error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Database error
+
+  /api/motorcycles/availability:
+    get:
+      summary: Search motorcycle availability
+      description: >
+        Search motorcycles with real-time availability for a branch/date/time/duration.
+        branch, date, start_time, and duration are all required together — this endpoint
+        always performs the conflict check (no silent skip).
+      parameters:
+        - in: query
+          name: branch
+          schema:
+            type: string
+            enum: [taipei, taichung, tainan]
+          required: true
+          description: Branch of rental shop.
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          required: true
+          description: Rental date (YYYY-MM-DD).
+        - in: query
+          name: start_time
+          schema:
+            type: string
+            pattern: '^[0-2][0-9]:[0-5][0-9]$'
+          required: true
+          description: Start time (HH:MM, 24h).
+        - in: query
+          name: duration
+          schema:
+            type: string
+            enum: [5h, 10h, 24h, 48h]
+          required: true
+          description: Rental duration.
+        - in: query
+          name: price_category
+          schema:
+            type: string
+            enum: [type-ss, type-s, type-a, type-b, type-c, type-minibike]
+          required: false
+          description: Price category of motorcycle.
+        - in: query
+          name: moto_type
+          schema:
+            type: string
+            enum: [cruiser, naked, sport, superbike]
+          required: false
+          description: Type/category of motorcycle.
+        - in: query
+          name: brand
+          schema:
+            type: string
+          required: false
+          description: Brand name (e.g. KAWASAKI, YAMAHA, HONDA).
+      responses:
+        '200':
+          description: Motorcycles list with availability
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MotorcyclesListResponse'
+              example:
+                count: 2
+                data:
+                  - id: 1
+                    image: /KAWASAKI_NINJA_400.png
+                    title: KAWASAKI NINJA 400
+                    brand: KAWASAKI
+                    price_category: type-s
+                    price: 5000
+                    moto_type: sport
+                    engine_displacement: 399cc
+                    max_horsepower: 45hp
+                    max_torque: 38Nm
+                    engine_type: 水冷四行程並列雙汽缸 DOHC 4V
+                    fuel_tank_capacity: 14L
+                    seat_height: 785mm
+                    weight: 168kg
                     availability:
                       available: true
                       message: Available for rent
@@ -122,11 +192,19 @@ paths:
                 filters_applied:
                   branch: taipei
                   date: 2025-12-15
-                  start_time: null
+                  start_time: 14:00
                   duration: 24h
                   price_category: type-s
                   moto_type: null
                   brand: null
+        '400':
+          description: Missing or invalid required parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: branch is required
         '500':
           description: Database error
           content:
