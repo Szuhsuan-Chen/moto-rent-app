@@ -23,19 +23,19 @@ public class AvailabilityService {
     public AvailabilityDto check(Long motorcycleId, String branch, LocalDate date,
                                   String startTime, String duration) {
         if (branch != null && !VALID_BRANCHES.contains(branch)) {
-            return AvailabilityDto.of(false, "Invalid branch selection");
+            return new AvailabilityDto(false, "Invalid branch selection");
         }
 
         if (startTime != null) {
             try {
                 LocalTime.parse(startTime);
             } catch (Exception e) {
-                return AvailabilityDto.of(false, "Incorrect time format");
+                return new AvailabilityDto(false, "Incorrect time format");
             }
         }
 
         if (duration != null && !pricingService.isValidDuration(duration)) {
-            return AvailabilityDto.of(false, "Invalid rental duration");
+            return new AvailabilityDto(false, "Invalid rental duration");
         }
 
         if (motorcycleId != null && branch != null && date != null
@@ -47,10 +47,10 @@ public class AvailabilityService {
             );
 
             if (conflicts > 0) {
-                return AvailabilityDto.of(false, "This time slot is already booked");
+                return new AvailabilityDto(false, "This time slot is already booked");
             }
         }
 
-        return AvailabilityDto.of(true, "Available for rent");
+        return new AvailabilityDto(true, "Available for rent");
     }
 }
