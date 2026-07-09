@@ -23,15 +23,25 @@ public class MotorcycleService {
     @Autowired
     private PricingService pricingService;
 
-    public List<MotorcycleDto> findMotorcycles(String branch, LocalDate date, String startTime,
+    // 純瀏覽車輛目錄，不查可用性（不需要 branch/date/start_time/duration）
+    public List<MotorcycleDto> findMotorcycles(String priceCategory, String motoType, String brand) {
+        MotorcycleFilterParams params = new MotorcycleFilterParams(priceCategory, motoType, brand);
+        List<Motorcycle> motorcycles = motorcycleMapper.findByFilters(params);
+        log.info("findByFilters({}) 撈出 {} 筆: {}", params, motorcycles.size(), motorcycles);
+
+        return motorcycles.stream()
+                .map(this::toCatalogDto)
+                .toList();
+    }
+
+    public List<MotorcycleDto> searchAvailability(String branch, LocalDate date, String startTime,
                                                String duration, String priceCategory,
                                                String motoType, String brand) {
-        // 把篩選參數包成物件傳給 MyBatis XML 動態查詢
         MotorcycleFilterParams params = new MotorcycleFilterParams(priceCategory, motoType, brand);
         List<Motorcycle> motorcycles = motorcycleMapper.findByFilters(params);
 
         return motorcycles.stream()
-                .map(moto -> toListDto(moto, branch, date, startTime, duration))
+                .map(moto -> toAvailabilityDto(moto, branch, date, startTime, duration))
                 .toList();
     }
 
@@ -65,7 +75,26 @@ public class MotorcycleService {
         return motorcycleMapper.findDistinctMotoTypes();
     }
 
-    private MotorcycleDto toListDto(Motorcycle moto, String branch, LocalDate date,
+    private MotorcycleDto toCatalogDto(Motorcycle moto) {
+        return MotorcycleDto.builder()
+                .id(moto.getId())
+                .image(moto.getImage())
+                .title(moto.getTitle())
+                .brand(moto.getBrand())
+                .priceCategory(moto.getPriceCategory())
+                .price(pricingService.getPrice(moto.getPriceCategory(), null))
+                .motoType(moto.getMotoType())
+                .engineDisplacement(moto.getEngineDisplacement())
+                .maxHorsepower(moto.getMaxHorsepower())
+                .maxTorque(moto.getMaxTorque())
+                .engineType(moto.getEngineType())
+                .fuelTankCapacity(moto.getFuelTankCapacity())
+                .seatHeight(moto.getSeatHeight())
+                .weight(moto.getWeight())
+                .build();
+    }
+
+    private MotorcycleDto toAvailabilityDto(Motorcycle moto, String branch, LocalDate date,
                                     String startTime, String duration) {
         AvailabilityDto availability = availabilityService.check(
                 moto.getId(), branch, date, startTime, duration
@@ -89,7 +118,7 @@ public class MotorcycleService {
                 .availability(availability)
                 .filterInfo(FilterInfoDto.builder()
                         .branch(branch)
-                        .date(date == null ? null : date.toString())
+                        .date(date.toString())
                         .startTime(startTime)
                         .duration(duration)
                         .build())
