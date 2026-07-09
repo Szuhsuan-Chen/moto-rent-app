@@ -8,47 +8,23 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 
 @Service
 public class AvailabilityService {
 
     @Autowired
     private RentalRecordMapper rentalRecordMapper;
-    @Autowired
-    private PricingService pricingService;
-
-    private static final List<String> VALID_BRANCHES = List.of("taipei", "taichung", "tainan");
 
     public AvailabilityDto check(Long motorcycleId, String branch, LocalDate date,
                                   String startTime, String duration) {
-        if (branch != null && !VALID_BRANCHES.contains(branch)) {
-            return new AvailabilityDto(false, "Invalid branch selection");
-        }
+        LocalDateTime startDatetime = LocalDateTime.of(date, LocalTime.parse(startTime));
 
-        if (startTime != null) {
-            try {
-                LocalTime.parse(startTime);
-            } catch (Exception e) {
-                return new AvailabilityDto(false, "Incorrect time format");
-            }
-        }
+        long conflicts = rentalRecordMapper.countConflictingRentals(
+                motorcycleId, branch, date, startDatetime
+        );
 
-        if (duration != null && !pricingService.isValidDuration(duration)) {
-            return new AvailabilityDto(false, "Invalid rental duration");
-        }
-
-        if (motorcycleId != null && branch != null && date != null
-                && startTime != null && duration != null) {
-            LocalDateTime startDatetime = LocalDateTime.of(date, LocalTime.parse(startTime));
-
-            long conflicts = rentalRecordMapper.countConflictingRentals(
-                    motorcycleId, branch, date, startDatetime
-            );
-
-            if (conflicts > 0) {
-                return new AvailabilityDto(false, "This time slot is already booked");
-            }
+        if (conflicts > 0) {
+            return new AvailabilityDto(false, "This time slot is already booked");
         }
 
         return new AvailabilityDto(true, "Available for rent");

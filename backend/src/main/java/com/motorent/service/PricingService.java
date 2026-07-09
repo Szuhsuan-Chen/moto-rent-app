@@ -2,14 +2,11 @@ package com.motorent.service;
 
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 // @Service: 標記為業務邏輯層，Spring 會自動管理這個 Bean
 @Service
 public class PricingService {
-
-    private static final List<String> VALID_DURATIONS = List.of("5h", "10h", "24h", "48h");
 
     // 價格對照表：車型類別 → (時長 → 價格)
     private static final Map<String, Map<String, Integer>> PRICE_MAP = Map.of(
@@ -36,9 +33,5 @@ public class PricingService {
 
     public boolean isValidCategory(String category) {
         return PRICE_MAP.containsKey(category);
-    }
-
-    public boolean isValidDuration(String duration) {
-        return VALID_DURATIONS.contains(duration);
     }
 }

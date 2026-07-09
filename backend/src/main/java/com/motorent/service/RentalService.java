@@ -54,9 +54,6 @@ public class RentalService {
         if (!pricingService.isValidCategory(priceCategory)) {
             throw new BadRequestException("Invalid motorcycle price category");
         }
-        if (!pricingService.isValidDuration(request.getDuration())) {
-            throw new BadRequestException("Invalid rental duration");
-        }
         Integer totalPrice = pricingService.getPrice(priceCategory, request.getDuration());
 
         LocalDate rentalDate = request.getRentalDate();
