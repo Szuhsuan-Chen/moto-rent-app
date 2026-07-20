@@ -13,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,8 +71,8 @@ public class MotorcycleController {
             LocalDate date,
 
             @RequestParam(name = "start_time")
-            @Pattern(regexp = "^\\d{2}:\\d{2}$", message = "start_time must be in format HH:mm")
-            String startTime,
+            @DateTimeFormat(pattern = "HH:mm")
+            LocalTime startTime,
 
             @RequestParam
             @Pattern(regexp = "^(?:5h|10h|24h|48h)$", message = "duration must be one of: 5h, 10h, 24h, 48h")
@@ -96,7 +97,7 @@ public class MotorcycleController {
         Map<String, Object> filtersApplied = new LinkedHashMap<>();
         filtersApplied.put("branch", branch);
         filtersApplied.put("date", date.toString());
-        filtersApplied.put("start_time", startTime);
+        filtersApplied.put("start_time", startTime.toString());
         filtersApplied.put("duration", duration);
         filtersApplied.put("price_category", priceCategory);
         filtersApplied.put("moto_type", motoType);

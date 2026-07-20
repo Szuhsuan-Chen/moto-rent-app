@@ -39,9 +39,12 @@ public class RentalService {
 
     @Transactional
     public RentalCreateResponseDto createRental(RentalRequestDto request) {
+        LocalDate rentalDate = request.getRentalDate();
+        LocalTime startTime = request.getStartTime();
+        LocalDateTime startDatetime = LocalDateTime.of(rentalDate, startTime);
+
         AvailabilityDto availability = availabilityService.check(
-                request.getMotorcycleId(), request.getBranch(),
-                request.getRentalDate(), request.getStartTime(), request.getDuration()
+                request.getMotorcycleId(), request.getBranch(), startDatetime, request.getDuration()
         );
         if (!availability.isAvailable()) {
             throw new BadRequestException(availability.getMessage());
@@ -56,10 +59,8 @@ public class RentalService {
         }
         Integer totalPrice = pricingService.getPrice(priceCategory, request.getDuration());
 
-        LocalDate rentalDate = request.getRentalDate();
-        LocalTime startTime = LocalTime.parse(request.getStartTime());
         int durationHours = Integer.parseInt(request.getDuration().replace("h", ""));
-        LocalDateTime endDatetime = LocalDateTime.of(rentalDate, startTime).plusHours(durationHours);
+        LocalDateTime endDatetime = startDatetime.plusHours(durationHours);
 
         RentalRecord rental = new RentalRecord();
         rental.setMotorcycleId(request.getMotorcycleId());  // MyBatis 版：只存 FK，不是物件

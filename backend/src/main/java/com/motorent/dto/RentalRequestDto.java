@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 // Request DTO: 接收前端 POST body，用 @Valid + @NotBlank 做輸入驗證
 @Data
@@ -39,9 +40,8 @@ public class RentalRequestDto {
     @FutureOrPresent(message = "rental_date must be today or a future date")
     private LocalDate rentalDate;
 
-    @NotBlank(message = "start_time is required")
-    @Pattern(regexp = "^\\d{2}:\\d{2}$", message = "start_time must be in format HH:mm")
-    private String startTime;
+    @NotNull(message = "start_time is required")
+    private LocalTime startTime;
 
     @NotBlank(message = "duration is required")
     @Pattern(regexp = "^(?:5h|10h|24h|48h)$", message = "duration must be one of: 5h, 10h, 24h, 48h")

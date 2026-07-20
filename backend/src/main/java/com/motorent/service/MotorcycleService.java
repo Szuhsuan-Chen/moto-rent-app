@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -34,9 +36,9 @@ public class MotorcycleService {
                 .toList();
     }
 
-    public List<MotorcycleDto> searchAvailability(String branch, LocalDate date, String startTime,
-                                               String duration, String priceCategory,
-                                               String motoType, String brand) {
+    public List<MotorcycleDto> searchAvailability(String branch, LocalDate date, LocalTime startTime,
+                                                   String duration, String priceCategory,
+                                                   String motoType, String brand) {
         MotorcycleFilterParams params = new MotorcycleFilterParams(priceCategory, motoType, brand);
         List<Motorcycle> motorcycles = motorcycleMapper.findByFilters(params);
 
@@ -95,9 +97,9 @@ public class MotorcycleService {
     }
 
     private MotorcycleDto toAvailabilityDto(Motorcycle moto, String branch, LocalDate date,
-                                    String startTime, String duration) {
+                                             LocalTime startTime, String duration) {
         AvailabilityDto availability = availabilityService.check(
-                moto.getId(), branch, date, startTime, duration
+                moto.getId(), branch, LocalDateTime.of(date, startTime), duration
         );
 
         return MotorcycleDto.builder()
@@ -119,7 +121,7 @@ public class MotorcycleService {
                 .filterInfo(FilterInfoDto.builder()
                         .branch(branch)
                         .date(date.toString())
-                        .startTime(startTime)
+                        .startTime(startTime.toString())
                         .duration(duration)
                         .build())
                 .build();
