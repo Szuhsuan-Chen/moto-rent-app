@@ -20,6 +20,10 @@ public interface MotorcycleMapper {
     @Select("SELECT * FROM motorcycles WHERE id = #{id}")
     Motorcycle findById(@Param("id") Long id);
 
+    // FOR UPDATE：建立租借前用來鎖住這台車，避免併發請求同時通過可用性檢查造成重複預約
+    @Select("SELECT * FROM motorcycles WHERE id = #{id} FOR UPDATE")
+    Motorcycle findByIdForUpdate(@Param("id") Long id);
+
     @Select("SELECT DISTINCT brand FROM motorcycles ORDER BY brand ASC")
     List<String> findDistinctBrands();
 

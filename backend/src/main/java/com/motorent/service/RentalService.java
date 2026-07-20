@@ -39,6 +39,10 @@ public class RentalService {
 
     @Transactional
     public RentalCreateResponseDto createRental(RentalRequestDto request) {
+        // 先鎖住這台車再檢查可用性：避免併發請求同時讀到「尚未有衝突紀錄」，導致同一時段被重複預約
+        Motorcycle motorcycle = motorcycleMapper.findByIdForUpdate(request.getMotorcycleId());
+        if (motorcycle == null) throw new ResourceNotFoundException("Motorcycle not found");
+
         LocalDate rentalDate = request.getRentalDate();
         LocalTime startTime = request.getStartTime();
         LocalDateTime startDatetime = LocalDateTime.of(rentalDate, startTime);
@@ -49,9 +53,6 @@ public class RentalService {
         if (!availability.isAvailable()) {
             throw new BadRequestException(availability.getMessage());
         }
-
-        Motorcycle motorcycle = motorcycleMapper.findById(request.getMotorcycleId());
-        if (motorcycle == null) throw new ResourceNotFoundException("Motorcycle not found");
 
         String priceCategory = motorcycle.getPriceCategory();
         if (!pricingService.isValidCategory(priceCategory)) {
