@@ -15,8 +15,12 @@ public class AvailabilityService {
 
     public AvailabilityDto check(Long motorcycleId, String branch, LocalDateTime startDatetime,
                                   String duration) {
+        int durationHours = Integer.parseInt(duration.replace("h", ""));
+        LocalDateTime endDatetime = startDatetime.plusHours(durationHours);
+
+        // 雙向區間重疊判斷：既有訂單的開始 < 新訂單的結束，且既有訂單的結束 > 新訂單的開始
         long conflicts = rentalRecordMapper.countConflictingRentals(
-                motorcycleId, branch, startDatetime.toLocalDate(), startDatetime
+                motorcycleId, branch, startDatetime, endDatetime
         );
 
         if (conflicts > 0) {

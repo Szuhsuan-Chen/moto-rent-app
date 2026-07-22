@@ -4,7 +4,6 @@ import com.motorent.dto.RentalFilterParams;
 import com.motorent.entity.RentalRecord;
 import org.apache.ibatis.annotations.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,13 +47,13 @@ public interface RentalRecordMapper {
             WHERE motorcycle_id = #{motorcycleId}
             AND branch = #{branch}
             AND status IN ('pending', 'confirmed')
-            AND rental_date <= #{rentalDate}
+            AND TIMESTAMP(rental_date, start_time) < #{endDatetime}
             AND end_datetime > #{startDatetime}
             """)
     long countConflictingRentals(
             @Param("motorcycleId") Long motorcycleId,
             @Param("branch") String branch,
-            @Param("rentalDate") LocalDate rentalDate,
-            @Param("startDatetime") LocalDateTime startDatetime
+            @Param("startDatetime") LocalDateTime startDatetime,
+            @Param("endDatetime") LocalDateTime endDatetime
     );
 }
