@@ -130,7 +130,18 @@ MySQL 需先手動執行 `db/init.sql` 建立資料表與範例資料（Docker �
 - **OpenAPI 規範檔案**: [backend/openapi.yaml](backend/openapi.yaml)
 - **API 文檔**: [backend/API_DOCUMENTATION.md](backend/API_DOCUMENTATION.md)
 
+### Swagger UI（推薦，可直接測試 API）
+
+後端已整合 springdoc-openapi，啟動後端服務（Docker 或本地）即可開啟 Swagger UI，直接在網頁上瀏覽並測試所有 API：
+
+```
+http://localhost:5001/swagger-ui/index.html
+```
+
+> 若以 `mvn spring-boot:run` 本地啟動（埠 8080），則改用 `http://localhost:8080/swagger-ui/index.html`。
+
 可使用以下工具查看與測試 API：
+- **Swagger UI**（見上方）- 內建於後端服務，免安裝即可互動測試
 - [Swagger Editor](https://editor.swagger.io/) - 貼上 `openapi.yaml` 內容即可查看互動式文檔
 - [Postman](https://www.postman.com/) - 匯入 `openapi.yaml` 檔案以自動生成 API 測試集合
 
