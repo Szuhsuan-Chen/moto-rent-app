@@ -3,6 +3,14 @@ import './Filterbar.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
+// 將 Date 物件轉為 <input type="date"> 需要的 YYYY-MM-DD 格式（避免 toISOString 因時區造成日期偏移）
+const formatDate = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 function Filterbar({ onSearch }) {
   const [filters, setFilters] = useState({
     branch: '',
@@ -11,6 +19,11 @@ function Filterbar({ onSearch }) {
     duration: '',
     priceCategory: ''
   });
+
+  // 可選日期範圍：明天起算一個月
+  const today = new Date();
+  const minDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const maxDate = new Date(minDate.getFullYear(), minDate.getMonth() + 1, minDate.getDate());
 
   // 處理輸入變化
   const handleChange = (e) => {
@@ -48,8 +61,8 @@ function Filterbar({ onSearch }) {
         name="date" 
         value={filters.date}
         onChange={handleChange}
-        min="2026-07-01" 
-        max="2026-07-31" 
+        min={formatDate(minDate)}
+        max={formatDate(maxDate)}
       />
 
       {/* 開始時間 */}
