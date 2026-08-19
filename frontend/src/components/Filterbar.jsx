@@ -36,6 +36,23 @@ function Filterbar({ onSearch }) {
 
   // 處理查詢按鈕點擊
   const handleSearch = () => {
+    // 五個欄位都必填，才能查詢
+    const requiredFields = {
+      branch: '租借分店',
+      date: '日期',
+      startTime: '開始時間',
+      duration: '租借時長',
+      priceCategory: '車型類別'
+    };
+    const missing = Object.entries(requiredFields)
+      .filter(([key]) => !filters[key])
+      .map(([, label]) => label);
+
+    if (missing.length > 0) {
+      alert(`請選擇：${missing.join('、')}`);
+      return;
+    }
+
     if (onSearch) {
       onSearch(filters);
     }
