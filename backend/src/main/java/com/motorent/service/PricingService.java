@@ -21,10 +21,10 @@ public class PricingService {
     public Integer getPrice(String priceCategory, String duration) {
         Map<String, Integer> prices = PRICE_MAP.get(priceCategory);
         if (prices == null) return null;
-        // 有指定時長就用對應價格，否則預設顯示 24h 價格
+        // 有指定時長就用對應價格，否則預設顯示最低的 5h 起始價
         return (duration != null && prices.containsKey(duration))
                 ? prices.get(duration)
-                : prices.get("24h");
+                : prices.get("5h");
     }
 
     public Map<String, Integer> getAllPrices(String priceCategory) {
