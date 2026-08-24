@@ -5,6 +5,7 @@ import com.motorent.dto.MotorcycleFilterParams;
 import com.motorent.entity.Motorcycle;
 import com.motorent.exception.ResourceNotFoundException;
 import com.motorent.repository.MotorcycleMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,26 +33,32 @@ class MotorcycleServiceTest {
     @InjectMocks
     private MotorcycleService motorcycleService;
 
+    private Motorcycle r3Moto;
+
+    @BeforeEach
+    void setUp() {
+        r3Moto = new Motorcycle();
+        r3Moto.setId(1L);
+        r3Moto.setImage("yamaha-r3.jpg");
+        r3Moto.setTitle("Yamaha R3");
+        r3Moto.setBrand("Yamaha");
+        r3Moto.setPriceCategory("type-a");
+        r3Moto.setMotoType("sport");
+        r3Moto.setEngineDisplacement(321);
+        r3Moto.setMaxHorsepower("42hp");
+        r3Moto.setMaxTorque("29.6Nm");
+        r3Moto.setEngineType("雙缸");
+        r3Moto.setFuelTankCapacity(14.0);
+        r3Moto.setSeatHeight(780);
+        r3Moto.setWeight(169);
+    }
+
     @Test
     void getMotorcycleById_whenFound_returnsDto() {
         // Arrange
-        Motorcycle moto = new Motorcycle();
-        moto.setId(1L);
-        moto.setImage("yamaha-r3.jpg");
-        moto.setTitle("Yamaha R3");
-        moto.setBrand("Yamaha");
-        moto.setPriceCategory("type-a");
-        moto.setMotoType("sport");
-        moto.setEngineDisplacement(321);
-        moto.setMaxHorsepower("42hp");
-        moto.setMaxTorque("29.6Nm");
-        moto.setEngineType("雙缸");
-        moto.setFuelTankCapacity(14.0);
-        moto.setSeatHeight(780);
-        moto.setWeight(169);
         Map<String, Integer> prices = Map.of("5h", 2000, "10h", 3200, "24h", 4000, "48h", 7200);
 
-        when(motorcycleMapper.findById(1L)).thenReturn(moto);
+        when(motorcycleMapper.findById(1L)).thenReturn(r3Moto);
         when(pricingService.getAllPrices("type-a")).thenReturn(prices);
 
         // Act
@@ -104,19 +111,6 @@ class MotorcycleServiceTest {
     void findMotorcycles_returnsMapperResultDirectly() {
         // Arrange
         MotorcycleFilterParams params = new MotorcycleFilterParams("type-a", "sport", "YAMAHA");
-        Motorcycle r3Moto = new Motorcycle();
-        r3Moto.setId(1L);
-        r3Moto.setTitle("Yamaha R3");
-        r3Moto.setBrand("Yamaha");
-        r3Moto.setPriceCategory("type-a");
-        r3Moto.setMotoType("sport");
-        r3Moto.setEngineDisplacement(321);
-        r3Moto.setMaxHorsepower("42hp");
-        r3Moto.setMaxTorque("29.6Nm");
-        r3Moto.setEngineType("雙缸");
-        r3Moto.setFuelTankCapacity(14.0);
-        r3Moto.setSeatHeight(780);
-        r3Moto.setWeight(169);
         Motorcycle r7Moto = new Motorcycle();
         r7Moto.setId(2L);
         r7Moto.setTitle("Yamaha R7");
@@ -138,6 +132,7 @@ class MotorcycleServiceTest {
 
         MotorcycleDto expectedR3Dto = MotorcycleDto.builder()
                 .id(1L)
+                .image("yamaha-r3.jpg")
                 .title("Yamaha R3")
                 .brand("Yamaha")
                 .priceCategory("type-a")
