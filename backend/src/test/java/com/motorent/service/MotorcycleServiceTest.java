@@ -45,8 +45,8 @@ class MotorcycleServiceTest {
         r3Moto.setPriceCategory("type-a");
         r3Moto.setMotoType("sport");
         r3Moto.setEngineDisplacement(321);
-        r3Moto.setMaxHorsepower("42hp");
-        r3Moto.setMaxTorque("29.6Nm");
+        r3Moto.setMaxHorsepower(42.0);
+        r3Moto.setMaxTorque(29.6);
         r3Moto.setEngineType("雙缸");
         r3Moto.setFuelTankCapacity(14.0);
         r3Moto.setSeatHeight(780);
@@ -72,8 +72,8 @@ class MotorcycleServiceTest {
         assertThat(result.getPriceCategory()).isEqualTo("type-a");
         assertThat(result.getMotoType()).isEqualTo("sport");
         assertThat(result.getEngineDisplacement()).isEqualTo(321);
-        assertThat(result.getMaxHorsepower()).isEqualTo("42hp");
-        assertThat(result.getMaxTorque()).isEqualTo("29.6Nm");
+        assertThat(result.getMaxHorsepower()).isEqualTo(42.0);
+        assertThat(result.getMaxTorque()).isEqualTo(29.6);
         assertThat(result.getEngineType()).isEqualTo("雙缸");
         assertThat(result.getFuelTankCapacity()).isEqualTo(14.0);
         assertThat(result.getSeatHeight()).isEqualTo(780);
@@ -118,8 +118,8 @@ class MotorcycleServiceTest {
         r7Moto.setPriceCategory("type-a");
         r7Moto.setMotoType("sport");
         r7Moto.setEngineDisplacement(689);
-        r7Moto.setMaxHorsepower("73hp");
-        r7Moto.setMaxTorque("67Nm");
+        r7Moto.setMaxHorsepower(73.0);
+        r7Moto.setMaxTorque(67.0);
         r7Moto.setEngineType("水冷四行程並列雙汽缸 DOHC 4V");
         r7Moto.setFuelTankCapacity(13.0);
         r7Moto.setSeatHeight(835);
@@ -139,8 +139,8 @@ class MotorcycleServiceTest {
                 .price(2000)
                 .motoType("sport")
                 .engineDisplacement(321)
-                .maxHorsepower("42hp")
-                .maxTorque("29.6Nm")
+                .maxHorsepower(42.0)
+                .maxTorque(29.6)
                 .engineType("雙缸")
                 .fuelTankCapacity(14.0)
                 .seatHeight(780)
@@ -154,8 +154,8 @@ class MotorcycleServiceTest {
                 .price(2000)
                 .motoType("sport")
                 .engineDisplacement(689)
-                .maxHorsepower("73hp")
-                .maxTorque("67Nm")
+                .maxHorsepower(73.0)
+                .maxTorque(67.0)
                 .engineType("水冷四行程並列雙汽缸 DOHC 4V")
                 .fuelTankCapacity(13.0)
                 .seatHeight(835)

@@ -80,8 +80,8 @@ paths:
                     price: 5000
                     moto_type: sport
                     engine_displacement: 399cc
-                    max_horsepower: 45hp
-                    max_torque: 38Nm
+                    max_horsepower: 45
+                    max_torque: 38
                     engine_type: 水冷四行程並列雙汽缸 DOHC 4V
                     fuel_tank_capacity: 14L
                     seat_height: 785mm
@@ -175,8 +175,8 @@ paths:
                     price: 5000
                     moto_type: sport
                     engine_displacement: 399cc
-                    max_horsepower: 45hp
-                    max_torque: 38Nm
+                    max_horsepower: 45
+                    max_torque: 38
                     engine_type: 水冷四行程並列雙汽缸 DOHC 4V
                     fuel_tank_capacity: 14L
                     seat_height: 785mm
@@ -244,8 +244,8 @@ paths:
                   price_category: type-s
                   moto_type: sport
                   engine_displacement: 399cc
-                  max_horsepower: 45hp
-                  max_torque: 38Nm
+                  max_horsepower: 45
+                  max_torque: 38
                   engine_type: 水冷四行程並列雙汽缸 DOHC 4V
                   fuel_tank_capacity: 14L
                   seat_height: 785mm
@@ -756,9 +756,9 @@ components:
         engine_displacement:
           type: string
         max_horsepower:
-          type: string
+          type: number
         max_torque:
-          type: string
+          type: number
         engine_type:
           type: string
           description: Descriptive text (can be in Chinese).
@@ -793,9 +793,9 @@ components:
         engine_displacement:
           type: string
         max_horsepower:
-          type: string
+          type: number
         max_torque:
-          type: string
+          type: number
         engine_type:
           type: string
         fuel_tank_capacity:

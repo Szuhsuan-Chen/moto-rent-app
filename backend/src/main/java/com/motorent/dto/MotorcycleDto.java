@@ -19,8 +19,8 @@ public class MotorcycleDto {
     private Map<String, Integer> prices;  // 詳情用：所有時長的價格表
     private String motoType;              // → moto_type
     private Integer engineDisplacement;    // → engine_displacement (cc)
-    private String maxHorsepower;          // → max_horsepower
-    private String maxTorque;              // → max_torque
+    private Double maxHorsepower;          // → max_horsepower
+    private Double maxTorque;              // → max_torque
     private String engineType;             // → engine_type
     private Double fuelTankCapacity;       // → fuel_tank_capacity (L)
     private Integer seatHeight;            // → seat_height (mm)

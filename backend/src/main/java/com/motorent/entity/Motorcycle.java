@@ -21,8 +21,8 @@ public class Motorcycle {
     private String priceCategory;      // 價格分類（如 economy、standard、premium）
     private String motoType;           // 車種類型（如 scooter、sport、naked）
     private Integer engineDisplacement; // 排氣量（cc）
-    private String maxHorsepower;       // 最大馬力
-    private String maxTorque;           // 最大扭力
+    private Double maxHorsepower;       // 最大馬力
+    private Double maxTorque;           // 最大扭力
     private String engineType;          // 引擎型式（如 單缸、雙缸）
     private Double fuelTankCapacity;    // 油箱容量（公升）
     private Integer seatHeight;         // 座墊高度（毫米）

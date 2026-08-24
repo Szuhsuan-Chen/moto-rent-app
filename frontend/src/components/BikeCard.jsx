@@ -86,8 +86,8 @@ function BikeCard({
                   <div className="col-6">
                       <p className="card-text">品牌 {brand}</p>
                       <p className="card-text">車身型式 {motoType}</p>
-                      <p className="card-text">最大馬力 {maxHorsepower}</p>
-                      <p className="card-text">最大扭力 {maxTorque}</p>
+                      <p className="card-text">最大馬力 {maxHorsepower}hp</p>
+                      <p className="card-text">最大扭力 {maxTorque}Nm</p>
                       <p className='card-text'>引擎型式 {engineType}</p>
                   </div>
                   <div className="col-6 text-end">
@@ -99,7 +99,7 @@ function BikeCard({
               </div>
               <div className='row mt-5'>
                   <div className='col-6'>
-                      <p className="card-text fw-bold">${price}</p>
+                      <p className="card-text fw-bold">${price}{!availability && ' 起'}</p>
                       {!isAvailable && (
                         <p className="card-text text-danger small">{availability.message}</p>
                       )}
