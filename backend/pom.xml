@@ -66,6 +66,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- H2: 整合測試用的記憶體資料庫，可切換 MySQL 相容模式 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- springdoc-openapi: 依 Controller 註解自動產生互動式 API 文件 (Swagger UI) -->
         <dependency>
             <groupId>org.springdoc</groupId>

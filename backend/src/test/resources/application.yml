@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    # H2 記憶體資料庫，MODE=MySQL 讓語法相容專案原本寫給 MySQL 的 SQL
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_UPPER=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always   # 每次啟動測試都重新執行 schema.sql，確保資料表是乾淨的
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
