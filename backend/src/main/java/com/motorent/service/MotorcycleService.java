@@ -29,7 +29,6 @@ public class MotorcycleService {
     public List<MotorcycleDto> findMotorcycles(String priceCategory, String motoType, String brand) {
         MotorcycleFilterParams params = new MotorcycleFilterParams(priceCategory, motoType, brand);
         List<Motorcycle> motorcycles = motorcycleMapper.findByFilters(params);
-        log.info("findByFilters({}) 撈出 {} 筆: {}", params, motorcycles.size(), motorcycles);
 
         return motorcycles.stream()
                 .map(this::toCatalogDto)
