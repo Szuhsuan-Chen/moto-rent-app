@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.motorent.repository.RentalRecordMapper">
+
+    <select id="findByFilters"
+            parameterType="com.motorent.dto.RentalFilterParams"
+            resultType="com.motorent.entity.RentalRecord">
+        SELECT r.*, m.title AS motorcycle_title, m.brand AS motorcycle_brand
+        FROM rental_records r
+        JOIN motorcycles m ON r.motorcycle_id = m.id
+        <where>
+            <if test="status != null">AND r.status = #{status}</if>
+            <if test="branch != null">AND r.branch = #{branch}</if>
+            <if test="customerPhone != null">AND r.customer_phone = #{customerPhone}</if>
+        </where>
+        ORDER BY r.created_at DESC
+    </select>
+
+</mapper>

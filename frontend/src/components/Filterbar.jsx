@@ -1,25 +1,94 @@
-import React from "react";
+import React, { useState } from "react";
 import './Filterbar.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
-function Filterbar() {
+// 將 Date 物件轉為 <input type="date"> 需要的 YYYY-MM-DD 格式（避免 toISOString 因時區造成日期偏移）
+const formatDate = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
+function Filterbar({ onSearch }) {
+  const [filters, setFilters] = useState({
+    branch: '',
+    date: '',
+    startTime: '',
+    duration: '',
+    priceCategory: ''
+  });
+
+  // 可選日期範圍：明天起算一個月
+  const today = new Date();
+  const minDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const maxDate = new Date(minDate.getFullYear(), minDate.getMonth() + 1, minDate.getDate());
+
+  // 處理輸入變化
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // 處理查詢按鈕點擊
+  const handleSearch = () => {
+    // 五個欄位都必填，才能查詢
+    const requiredFields = {
+      branch: '租借分店',
+      date: '日期',
+      startTime: '開始時間',
+      duration: '租借時長',
+      priceCategory: '車型類別'
+    };
+    const missing = Object.entries(requiredFields)
+      .filter(([key]) => !filters[key])
+      .map(([, label]) => label);
+
+    if (missing.length > 0) {
+      alert(`請選擇：${missing.join('、')}`);
+      return;
+    }
+
+    if (onSearch) {
+      onSearch(filters);
+    }
+  };
+
   return (
     <div className="filter-bar">
       {/* 租借分店 */}
-      <select name="branch" defaultValue="">
-        <option value="" disabled hidden>租借分店</option>
+      <select 
+        name="branch" 
+        value={filters.branch}
+        onChange={handleChange}
+      >
+        <option value="">租借分店</option>
         <option value="taipei">台北旗艦店</option>
         <option value="taichung">台中概念店</option>
         <option value="tainan">台南體驗店</option>
       </select>
 
       {/* 選擇日期 */}
-      <input type="date" name="date" min="2025-09-01" max="2025-11-30" />
+      <input 
+        type="date" 
+        name="date" 
+        value={filters.date}
+        onChange={handleChange}
+        min={formatDate(minDate)}
+        max={formatDate(maxDate)}
+      />
 
       {/* 開始時間 */}
-      <select name="startTime" defaultValue="">
-        <option value="" disabled hidden>開始時間</option>
+      <select 
+        name="startTime" 
+        value={filters.startTime}
+        onChange={handleChange}
+      >
+        <option value="">開始時間</option>
         {[
           "10:00", "10:30", "11:00", "11:30", "12:00", "12:30",
           "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
@@ -32,8 +101,12 @@ function Filterbar() {
       </select>
 
       {/* 租借時長方案 */}
-      <select name="duration" defaultValue="">
-        <option value="" disabled hidden>租借時長方案</option>
+      <select 
+        name="duration" 
+        value={filters.duration}
+        onChange={handleChange}
+      >
+        <option value="">租借時長方案</option>
         <option value="5h">5H</option>
         <option value="10h">10H</option>
         <option value="24h">24H</option>
@@ -41,8 +114,12 @@ function Filterbar() {
       </select>
 
       {/* 車型類別（價格） */}
-      <select name="priceCategory" defaultValue="">
-        <option value="" disabled hidden>車型類別（價格）</option>
+      <select 
+        name="priceCategory" 
+        value={filters.priceCategory}
+        onChange={handleChange}
+      >
+        <option value="">車型類別（價格）</option>
         <option value="type-ss">TYPE-SS</option>
         <option value="type-s">TYPE-S</option>
         <option value="type-a">TYPE-A</option>
@@ -52,7 +129,7 @@ function Filterbar() {
       </select>
 
       {/* 篩選按鈕 */}
-      <button className="filter-btn" type="button">
+      <button className="filter-btn" type="button" onClick={handleSearch}>
         Search <FontAwesomeIcon icon={faMagnifyingGlass} />
       </button>
     </div>

@@ -6,27 +6,55 @@ import Hero from './components/Hero'
 import Footer from './components/Footer'
 import BikeCard from './components/BikeCard'
 
+const toCamelCase = (str) => str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+const transformKeys = (obj) => {
+  if (Array.isArray(obj)) return obj.map(transformKeys)
+  if (obj !== null && typeof obj === 'object')
+    return Object.fromEntries(Object.entries(obj).map(([k, v]) => [toCamelCase(k), transformKeys(v)]))
+  return obj
+}
+
 function App() {
   const [bikesData, setBikesData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [currentFilters, setCurrentFilters] = useState({})
 
   // 從後端 API 獲取摩托車資料
-  useEffect(() => {
-    const fetchMotorcycles = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('http://localhost:5000/api/motorcycles')
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        
-        const data = await response.json()
-        setBikesData(data)
-      } catch (error) {
-        console.error('獲取摩托車資料時發生錯誤:', error)
-        setError(error.message)
+  const fetchMotorcycles = async (filters = {}) => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // branch/date/start_time/duration 要嘛全給、要嘛全不給：
+      // 全給才是「查可用性」，走 /motorcycles/availability；否則是單純瀏覽目錄，走 /motorcycles
+      const hasFullSearch = filters.branch && filters.date && filters.startTime && filters.duration
+      const endpoint = hasFullSearch ? '/api/motorcycles/availability' : '/api/motorcycles'
+
+      const params = new URLSearchParams()
+      if (hasFullSearch) {
+        params.append('branch', filters.branch)
+        params.append('date', filters.date)
+        params.append('start_time', filters.startTime)
+        params.append('duration', filters.duration)
+      }
+      if (filters.priceCategory) params.append('price_category', filters.priceCategory)
+
+      const url = `${endpoint}${params.toString() ? '?' + params.toString() : ''}`
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const result = await response.json()
+      // Backend returns { count, data }, extract the data array
+      // transformKeys: 在 API 邊界把 snake_case JSON 轉成 JS 慣用的 camelCase
+      setBikesData(transformKeys(result.data || []))
+      setCurrentFilters(filters)
+    } catch (error) {
+      console.error('獲取摩托車資料時發生錯誤:', error)
+      setError(error.message)
         
         // 如果 API 失敗，使用預設資料作為備份
         const fallbackData = [
@@ -37,13 +65,13 @@ function App() {
             brand: "KAWASAKI",
             price: "2400",
             motoType: "跑車",
-            engineDisplacement: "140cc",
-            maxHorsepower: "45hp",
-            maxTorque: "38Nm",
+            engineDisplacement: 140,
+            maxHorsepower: 45,
+            maxTorque: 38,
             engineType: "水冷四行程單汽缸 SOHC 4V",
-            fuelTankCapacity: "14L",
-            seatHeight: "785mm",
-            weight: "168kg"
+            fuelTankCapacity: 14.0,
+            seatHeight: 785,
+            weight: 168
           },
           {
             id: 2,
@@ -52,13 +80,13 @@ function App() {
             brand: "YAMAHA",
             price: "2200",
             motoType: "跑車",
-            engineDisplacement: "321cc",
-            maxHorsepower: "42hp",
-            maxTorque: "29.6Nm",
+            engineDisplacement: 321,
+            maxHorsepower: 42,
+            maxTorque: 29.6,
             engineType: "水冷四行程並列雙汽缸 DOHC 4V",
-            fuelTankCapacity: "14L",
-            seatHeight: "780mm",
-            weight: "169kg"
+            fuelTankCapacity: 14.0,
+            seatHeight: 780,
+            weight: 169
           }
         ]
         setBikesData(fallbackData)
@@ -67,8 +95,20 @@ function App() {
       }
     }
 
+  // 初始載入所有資料
+  useEffect(() => {
     fetchMotorcycles()
   }, [])
+
+  // 處理查詢按鈕點擊
+  const handleSearch = (filters) => {
+    fetchMotorcycles(filters)
+  }
+
+  // 重置到初始狀態
+  const handleReset = () => {
+    fetchMotorcycles()
+  }
 
   if (loading) {
     return (
@@ -87,11 +127,22 @@ function App() {
       <Navbar/>
 
       {/* Hero 區塊 */}
-      <Hero/>
+      <Hero onSearch={handleSearch}/>
 
       {/* 內容區塊（車輛卡片之後會放這） */}
       <div className="container py-5">
-        <h2 className="mb-4">🔥 熱門車款</h2>
+        {/* 顯示篩選資訊 */}
+        {Object.keys(currentFilters).some(key => currentFilters[key]) && (
+          <div className="alert alert-info mb-4" role="alert">
+            <strong>篩選結果：</strong>
+            {currentFilters.branch && ` 分店: ${currentFilters.branch}`}
+            {currentFilters.date && ` | 日期: ${currentFilters.date}`}
+            {currentFilters.startTime && ` | 時間: ${currentFilters.startTime}`}
+            {currentFilters.duration && ` | 時長: ${currentFilters.duration}`}
+            {currentFilters.priceCategory && ` | 車型: ${currentFilters.priceCategory}`}
+            <span className="ms-3">共找到 {bikesData.length} 台車</span>
+          </div>
+        )}
         
         {/* 顯示錯誤訊息（如果有的話） */}
         {error && (
@@ -103,8 +154,9 @@ function App() {
         <div className="row">
           {/* 動態產生車輛卡片 */}
           {bikesData.map(bike => (
-            <BikeCard 
+            <BikeCard
               key={bike.id}
+              id={bike.id}
               image={bike.image}
               title={bike.title}
               brand={bike.brand}
@@ -117,6 +169,14 @@ function App() {
               fuelTankCapacity={bike.fuelTankCapacity}
               seatHeight={bike.seatHeight}
               weight={bike.weight}
+              availability={bike.availability}
+              filterData={{
+                branch: currentFilters.branch || '',
+                date: currentFilters.date || '',
+                startTime: currentFilters.startTime || '',
+                duration: currentFilters.duration || ''
+              }}
+              onReset={handleReset}
             />
           ))}
         </div>

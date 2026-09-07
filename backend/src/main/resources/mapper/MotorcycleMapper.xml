@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+  MyBatis 動態 SQL：根據傳入的參數決定要加哪些 WHERE 條件
+  <where> 標籤：只有內部有條件時才加 WHERE，並自動處理開頭多餘的 AND
+  <if test="...">：判斷參數是否為 null，null 就跳過這個條件
+
+  面試考點：這就是 MyBatis 的核心優勢，SQL 完全由你控制，又不用自己拼字串
+-->
+<mapper namespace="com.motorent.repository.MotorcycleMapper">
+
+    <select id="findByFilters"
+            parameterType="com.motorent.dto.MotorcycleFilterParams"
+            resultType="com.motorent.entity.Motorcycle">
+        SELECT * FROM motorcycles
+        <where>
+            <if test="priceCategory != null">
+                AND price_category = #{priceCategory}
+            </if>
+            <if test="motoType != null">
+                AND moto_type = #{motoType}
+            </if>
+            <if test="brand != null">
+                AND brand = #{brand}
+            </if>
+        </where>
+        ORDER BY price_category DESC
+    </select>
+
+</mapper>
