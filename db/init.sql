@@ -1,4 +1,7 @@
-﻿-- 摩托車租賃應用程式資料庫初始化腳本
+-- 摩托車租賃應用程式資料庫初始化腳本
+
+-- 強制以 utf8mb4 匯入，避免 mysql client 預設 latin1 造成中文亂碼
+SET NAMES utf8mb4;
 
 -- 建立資料庫（如果不存在）
 CREATE DATABASE IF NOT EXISTS mydb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
