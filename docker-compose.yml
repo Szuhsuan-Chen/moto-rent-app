@@ -7,6 +7,8 @@ services:
       - "3000:3000"
     stdin_open: true
     tty: true
+    environment:
+      VITE_PROXY_TARGET: http://backend:8080  # container network 內用 service name，不是 localhost
     depends_on:
       - backend
 

@@ -42,7 +42,7 @@ function BikeCard({
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5001/api/rentals', {
+      const response = await fetch('/api/rentals', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -40,7 +40,7 @@ function App() {
       }
       if (filters.priceCategory) params.append('price_category', filters.priceCategory)
 
-      const url = `http://localhost:5001${endpoint}${params.toString() ? '?' + params.toString() : ''}`
+      const url = `${endpoint}${params.toString() ? '?' + params.toString() : ''}`
       const response = await fetch(url)
       
       if (!response.ok) {

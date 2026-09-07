@@ -1,0 +1,17 @@
+# Stage 1: Build - 用 Vite 打包成純靜態檔案
+FROM node:20-alpine AS build
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# Stage 2: Runtime - 只留靜態檔案 + nginx，image 遠比帶著 node_modules 的 dev image 小
+FROM nginx:1.27-alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
